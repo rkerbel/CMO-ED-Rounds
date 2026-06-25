@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ED Huddle — UCLA Health</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2774AE;--gold:#FFD100;--dark:#003B5C;
+  --bg:#F0F4F8;--surface:#fff;--s2:#F8FAFC;--border:#E2E8F0;
+  --text:#1A202C;--muted:#64748B;--light:#94A3B8;
+  --red:#DC2626;--red-bg:#FEF2F2;
+  --amber:#B45309;--amber-bg:#FFFBEB;
+  --green:#15803D;--green-bg:#F0FDF4;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.screen{display:none;height:100dvh;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* LOGIN */
+#login{background:var(--dark);justify-content:flex-end}
+.login-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px 24px;gap:6px}
+.logo-mark{width:60px;height:60px;background:var(--blue);border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;color:var(--gold);margin-bottom:10px}
+.login-top h1{font-size:22px;font-weight:700;color:#fff;text-align:center}
+.login-top p{font-size:14px;color:rgba(255,255,255,.5);text-align:center}
+.login-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:28px 20px max(40px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+.fl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:6px}
+.fi,.fs{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:var(--text);background:var(--s2);-webkit-appearance:none;appearance:none}
+.fi:focus,.fs:focus{outline:none;border-color:var(--blue);background:#fff}
+.sw{position:relative}.sw::after{content:'▾';position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.btn-p{width:100%;padding:16px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer}
+.huddle-chip{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.hc-dot{width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.hc-txt{font-size:13px;color:var(--muted);font-weight:500}
+
+/* APP SHELL */
+.app-header{background:var(--dark);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.hl{display:flex;align-items:center;gap:10px}
+.h-logo{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);font-weight:500}
+.h-sep{width:1px;height:18px;background:rgba(255,255,255,.2)}
+.h-title{font-size:14px;font-weight:600;color:#fff}
+.role-pill{padding:5px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.rp-opt{background:rgba(255,209,0,.18);color:var(--gold)}
+.rp-cmo{background:rgba(39,116,174,.4);color:#90CDF4}
+.rp-chr{background:rgba(129,230,217,.2);color:#5EEAD4}
+.rp-ecu{background:rgba(252,165,165,.2);color:#FCA5A5}
+.rp-nur{background:rgba(216,180,254,.2);color:#C4B5FD}
+.rp-hsp{background:rgba(167,243,208,.2);color:#6EE7B7}
+.rp-crd{background:rgba(154,230,180,.2);color:#86EFAC}
+.rp-bed{background:rgba(252,129,74,.2);color:#FB923C}
+.rp-vlu{background:rgba(255,209,0,.15);color:var(--gold)}
+.cd{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;color:#fff;background:rgba(255,255,255,.1);padding:5px 10px;border-radius:8px}
+.cd.soon{color:var(--gold);background:rgba(255,209,0,.15)}
+
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 0}
+
+/* TABS */
+.tab-bar{display:flex;gap:3px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:4px;margin-bottom:14px;flex-shrink:0}
+.tab{flex:1;padding:10px 4px;border-radius:10px;border:none;background:none;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.tab.active{background:var(--dark);color:#fff}
+.page{display:none}.page.active{display:block}
+
+/* BED BUTTONS */
+.bed-card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);margin-bottom:12px;overflow:hidden}
+.bc-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.bc-title{font-size:14px;font-weight:700;color:var(--text)}
+.bc-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.edit-hint{font-size:10px;font-weight:600;color:var(--blue);background:#EBF8FF;padding:4px 9px;border-radius:20px;border:1px solid #BEE3F8;white-space:nowrap}
+.bed-row{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 14px}
+.bed-btn{width:56px;height:56px;border-radius:12px;border:2px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .1s;font-family:'Inter',sans-serif;background:none;-webkit-appearance:none}
+.bed-btn:active{transform:scale(.88)}
+.bed-btn .bn{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500}
+.bed-btn .bs{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.bed-btn.occupied{background:var(--red-bg);border-color:#FCA5A5;color:var(--red)}
+.bed-btn.open-bed{background:var(--green-bg);border-color:#86EFAC;color:var(--green)}
+.bed-btn.boarding{background:var(--amber-bg);border-color:#FCD34D;color:var(--amber)}
+.bed-btn.cleaning{background:#F8FAFC;border-color:#CBD5E1;color:#64748B}
+.bed-legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 16px 14px;border-top:1px solid var(--border)}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.ld{width:10px;height:10px;border-radius:3px}
+.ld.occupied{background:var(--red)}.ld.open-bed{background:var(--green)}.ld.boarding{background:#D97706}.ld.cleaning{background:#94A3B8}
+
+/* CENSUS TILES */
+.census-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+.stat-tile{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center}
+.sv{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;line-height:1}
+.sv.red{color:var(--red)}.sv.amb{color:var(--amber)}.sv.grn{color:var(--green)}
+.sl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:4px}
+.census-owner{font-size:10px;color:var(--muted);text-align:right;margin-bottom:12px;padding-right:2px}
+
+/* SECTION CARDS */
+.section-card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);margin-bottom:10px;overflow:hidden}
+.s-head{display:flex;align-items:center;padding:16px;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.s-num{width:32px;height:32px;flex-shrink:0;background:var(--dark);color:#fff;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center}
+.s-num.mine{background:var(--blue)}
+.s-info{flex:1;min-width:0}
+.s-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.s-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.time-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:3px 7px;border-radius:6px}
+.s-dot{width:9px;height:9px;border-radius:50%}
+.s-dot.done{background:var(--green)}.s-dot.draft{background:#F59E0B}.s-dot.empty{background:var(--border)}
+.chev{color:var(--light);font-size:11px;transition:transform .2s}
+.chev.open{transform:rotate(180deg)}
+.s-body{padding:0 16px 18px;display:none}
+.s-body.open{display:block}
+
+/* FORM */
+.fg{margin-bottom:14px}.fg:last-child{margin-bottom:0}
+.fla{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:7px}
+.fin{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--s2);-webkit-appearance:none}
+.fin:focus{outline:none;border-color:var(--blue);background:#fff}
+.fta{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--s2);resize:none;line-height:1.5;min-height:80px}
+.fta:focus{outline:none;border-color:var(--blue);background:#fff}
+.nl{display:flex;flex-direction:column;gap:8px}
+.nr{display:flex;align-items:center;gap:10px}
+.nb{width:24px;height:24px;flex-shrink:0;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.nr input{flex:1;padding:12px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--s2);-webkit-appearance:none}
+.nr input:focus{outline:none;border-color:var(--blue);background:#fff}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.save-btn{width:100%;padding:14px;margin-top:16px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.save-btn.saved{background:var(--green)}
+.census-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ct{background:var(--s2);border:1.5px solid var(--border);border-radius:12px;padding:12px}
+.ct label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:6px}
+.ct input{width:100%;font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--text);border:none;background:none;padding:0;-webkit-appearance:none}
+.ct input:focus{outline:none;color:var(--blue)}
+
+/* LIVE VIEW */
+.live-banner{background:var(--dark);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.lb-left .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45)}
+.lb-left .title{font-size:17px;font-weight:700;color:#fff;margin:3px 0 8px}
+.pw{background:rgba(255,255,255,.12);border-radius:4px;height:4px;width:140px}
+.pf{height:100%;border-radius:4px;background:var(--gold);width:57%}
+.pt{font-size:10px;color:rgba(255,255,255,.5);margin-top:5px}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);padding:8px 13px;border-radius:20px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.live-txt{font-size:12px;font-weight:700;color:#fff}
+.read-card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);margin-bottom:10px;overflow:hidden}
+.rh{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.rn{width:30px;height:30px;border-radius:8px;background:var(--dark);color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rm{flex:1}.r-title{font-size:14px;font-weight:700}.r-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.rb{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.rfl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.rfv{font-size:13px;color:var(--text);line-height:1.6}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:4px}
+.rlist li{font-size:13px;color:var(--text);padding-left:14px;position:relative;line-height:1.5}
+.rlist li::before{content:'–';position:absolute;left:0;color:var(--light)}
+.awaiting{opacity:.4;pointer-events:none}
+.aw-tag{font-size:11px;font-weight:600;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
+.pt-table{width:100%;border-collapse:collapse;margin-top:8px}
+.pt-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1.5px solid var(--border)}
+.pt-table td{font-size:12px;padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+.pt-table tr:last-child td{border-bottom:none}
+.bt{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;background:var(--blue);color:#fff;padding:2px 7px;border-radius:5px}
+.bt.b{background:#D97706}
+.stag{font-size:10px;font-weight:700}
+.stag.ok{color:var(--green)}.stag.warn{color:var(--amber)}.stag.crit{color:var(--red)}
+
+/* ACTIONS */
+.ah{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ah h2{font-size:18px;font-weight:700}
+.add-btn{padding:9px 15px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer}
+.ag-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px}
+.action-item{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+.ac{width:22px;height:22px;flex-shrink:0;border:2px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px;-webkit-tap-highlight-color:transparent;transition:all .15s;background:none}
+.ac.checked{background:var(--green);border-color:var(--green)}
+.ac.checked::after{content:'✓';font-size:12px;color:#fff;font-weight:700}
+.ac-body{flex:1;min-width:0}
+.ac-text{font-size:14px;color:var(--text);line-height:1.4}
+.ac-text.done{text-decoration:line-through;color:var(--muted)}
+.ac-foot{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.ot{font-size:10px;font-weight:700;background:var(--s2);border:1px solid var(--border);padding:3px 8px;border-radius:6px;color:var(--muted)}
+.dt{font-size:10px;color:var(--light);padding:3px 0}
+
+/* BOTTOM NAV */
+.bottom-nav{background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0;padding-bottom:max(8px,env(safe-area-inset-bottom));flex-shrink:0}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 20px;border-radius:10px;border:none;background:none;font-size:10px;font-weight:600;color:var(--muted);font-family:'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nav-btn.active{color:var(--blue)}
+.ni{font-size:20px}
+
+/* BED EDIT OVERLAY */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end}
+.overlay.open{display:flex}
+.sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px max(40px,env(safe-area-inset-bottom));width:100%;max-height:75dvh;overflow-y:auto}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 20px}
+.sheet h3{font-size:18px;font-weight:700;margin-bottom:4px}
+.sheet p{font-size:13px;color:var(--muted);margin-bottom:18px}
+.so-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.so{padding:16px 12px;border-radius:14px;border:2px solid var(--border);text-align:center;cursor:pointer;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;transition:all .15s;background:none}
+.so .oi{font-size:24px;margin-bottom:4px}
+.so .ol{font-size:12px;font-weight:700;display:block}
+.so .os{font-size:10px;color:var(--muted);margin-top:2px;display:block}
+.so.sel-occupied{background:var(--red-bg);border-color:var(--red)}
+.so.sel-open{background:var(--green-bg);border-color:var(--green)}
+.so.sel-boarding{background:var(--amber-bg);border-color:#D97706}
+.so.sel-cleaning{background:#F1F5F9;border-color:#64748B}
+.notes-f{width:100%;margin-top:14px;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;background:var(--s2);color:var(--text);resize:none;min-height:72px}
+.notes-f:focus{outline:none;border-color:var(--blue);background:#fff}
+.sheet-save{width:100%;margin-top:14px;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer}
+.scroll-pad{height:20px}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login" class="screen active">
+  <div class="login-top">
+    <div class="logo-mark">ValU</div>
+    <h1>ED Throughput Huddle</h1>
+    <p>UCLA Health · Daily 2:00 PM</p>
+  </div>
+  <div class="login-sheet">
+    <div>
+      <label class="fl">Email</label>
+      <input class="fi" type="email" value="j.chen@ucla.edu"/>
+    </div>
+    <div>
+      <label class="fl">My Role</label>
+      <div class="sw">
+        <select class="fs" id="role-select">
+          <option value="opt">ED Optimizer (Physician)</option>
+          <option value="chr">ED Charge Nurse</option>
+          <option value="ecu">ECU Charge Nurse</option>
+          <option value="cmo">CMO / Executive</option>
+          <option value="hsp">Hospitalist Triage Officer</option>
+          <option value="nur">ED Nursing Director</option>
+          <option value="crd">Care Coordination</option>
+          <option value="bed">Bed Placement</option>
+          <option value="vlu">ValU Team (Facilitator)</option>
+        </select>
+      </div>
+    </div>
+    <button class="btn-p" onclick="signIn()">Sign in →</button>
+    <div class="huddle-chip">
+      <div class="hc-dot"></div>
+      <span class="hc-txt">Next huddle: Tue Jun 24 · 2:00 PM</span>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" class="screen">
+  <div class="app-header">
+    <div class="hl">
+      <span class="h-logo">ValU</span>
+      <div class="h-sep"></div>
+      <span class="h-title">ED Huddle · 6/24</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="role-pill rp-opt" id="role-pill">Optimizer</span>
+      <span class="cd" id="countdown">--:--:--</span>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+    <div class="tab-bar">
+      <button class="tab active" onclick="showPage('report',this)">My Report</button>
+      <button class="tab" onclick="showPage('live',this)">Live Huddle</button>
+      <button class="tab" onclick="showPage('actions',this)">Actions</button>
+    </div>
+
+    <!-- PAGE: MY REPORT -->
+    <div id="report" class="page active">
+
+      <!-- Beds 9-12 -->
+      <div class="bed-card">
+        <div class="bc-head">
+          <div><div class="bc-title">Protected Beds · 9–12</div><div class="bc-sub">Goal: keep open for resus / high acuity</div></div>
+          <span class="edit-hint">Tap to update</span>
+        </div>
+        <div class="bed-row" id="beds-9-12"></div>
+        <div class="bed-legend">
+          <div class="li"><div class="ld occupied"></div>Occupied</div>
+          <div class="li"><div class="ld open-bed"></div>Open</div>
+          <div class="li"><div class="ld boarding"></div>Boarding</div>
+          <div class="li"><div class="ld cleaning"></div>Cleaning</div>
+        </div>
+      </div>
+
+      <!-- Beds 22-27 -->
+      <div class="bed-card">
+        <div class="bc-head">
+          <div><div class="bc-title">Fast Track · 22–27</div><div class="bc-sub">Goal: available for lower-acuity patients</div></div>
+          <span class="edit-hint">Tap to update</span>
+        </div>
+        <div class="bed-row" id="beds-22-27"></div>
+        <div class="bed-legend">
+          <div class="li"><div class="ld occupied"></div>Occupied</div>
+          <div class="li"><div class="ld open-bed"></div>Open</div>
+          <div class="li"><div class="ld boarding"></div>Boarding</div>
+          <div class="li"><div class="ld cleaning"></div>Cleaning</div>
+        </div>
+      </div>
+
+      <!-- Census stats -->
+      <div class="census-bar">
+        <div class="stat-tile"><div class="sv red" id="stat-t">38</div><div class="sl">Census</div></div>
+        <div class="stat-tile"><div class="sv amb" id="stat-b">12</div><div class="sl">Boarding</div></div>
+        <div class="stat-tile"><div class="sv grn" id="stat-o">2</div><div class="sl">Open</div></div>
+        <div class="stat-tile"><div class="sv red" id="stat-a">6</div><div class="sl">Hi Acuity</div></div>
+      </div>
+      <div class="census-owner">Updated by ED Charge + ECU Charge</div>
+
+      <!-- ED CHARGE section -->
+      <div class="section-card role-section" data-roles="chr" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">C</div>
+          <div class="s-info"><div class="s-title">ED Census Entry</div><div class="s-sub">ED Charge Nurse · your report</div></div>
+          <div class="s-right"><div class="s-dot draft"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="census-grid">
+            <div class="ct"><label>Total ED Pts</label><input type="number" value="38" oninput="document.getElementById('stat-t').textContent=this.value||'—'"/></div>
+            <div class="ct"><label>Boarding</label><input type="number" value="12" oninput="document.getElementById('stat-b').textContent=this.value||'—'"/></div>
+            <div class="ct"><label>Open Beds</label><input type="number" value="2" oninput="document.getElementById('stat-o').textContent=this.value||'—'"/></div>
+            <div class="ct"><label>High Acuity</label><input type="number" value="6" oninput="document.getElementById('stat-a').textContent=this.value||'—'"/></div>
+          </div>
+          <div class="fg"><label class="fla">Flags / notable patients</label><textarea class="fta">Bed 11 — trach/cerebral palsy, high complexity. Hall near 12 may need upgrade.</textarea></div>
+          <button class="save-btn" onclick="markSaved(this)">Save Census</button>
+        </div>
+      </div>
+
+      <!-- ECU CHARGE section -->
+      <div class="section-card role-section" data-roles="ecu" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">E</div>
+          <div class="s-info"><div class="s-title">ECU Boarder Census</div><div class="s-sub">ECU Charge Nurse · your report</div></div>
+          <div class="s-right"><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="census-grid">
+            <div class="ct"><label>ECU Boarders</label><input type="number" placeholder="0"/></div>
+            <div class="ct"><label>Hall Boarders</label><input type="number" placeholder="0"/></div>
+          </div>
+          <div class="fg"><label class="fla">Boarder status &amp; flags</label><textarea class="fta" placeholder="Who is boarding, status, plan for each…"></textarea></div>
+          <button class="save-btn" onclick="markSaved(this)">Save ECU Report</button>
+        </div>
+      </div>
+
+      <!-- OPTIMIZER section -->
+      <div class="section-card role-section" data-roles="opt nur vlu cmo" id="opt-section">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine" id="opt-num">2</div>
+          <div class="s-info"><div class="s-title">ED Optimizer + Nursing Dir.</div><div class="s-sub" id="opt-sub">Your report · 10 min</div></div>
+          <div class="s-right"><span class="time-tag">10 min</span><div class="s-dot draft"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="fg"><label class="fla">Walk Rounds Summary</label><textarea class="fta">Walk rounds complete. Bed 12 needs MICU eval — Airborne precautions. Should #12 be upgraded?</textarea></div>
+          <div class="fg"><label class="fla">DESA Escalations</label><textarea class="fta">Bed 9 (urology/Foley) → 7W ✓
+Bed 10 (pre-liver tx/Foley) → GOU/5SEMS ✓
+Transport pending both.</textarea></div>
+          <hr class="divider">
+          <div class="fg"><label class="fla">Top 3 Prioritizations</label>
+            <div class="nl">
+              <div class="nr"><div class="nb">1</div><input type="text" value="H11A — 20+ admissions, expedition to recuperative referral"/></div>
+              <div class="nr"><div class="nb">2</div><input type="text" value="H12B — Refused SM/WV transfers, need alt plan"/></div>
+              <div class="nr"><div class="nb">3</div><input type="text" value="Bed 12 MICU eval — Airborne, review chart"/></div>
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="fg"><label class="fla">Top 3 Recurring Barriers</label>
+            <div class="nl">
+              <div class="nr"><div class="nb">1</div><input type="text" value="Close loop on morning escalations"/></div>
+              <div class="nr"><div class="nb">2</div><input type="text" value="SM/WV transfer refusals ongoing"/></div>
+              <div class="nr"><div class="nb">3</div><input type="text" value="Bed 38 solid onc — transfer to SM pending"/></div>
+            </div>
+          </div>
+          <button class="save-btn" onclick="markSaved(this)">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- HOSPITALIST section -->
+      <div class="section-card role-section" data-roles="hsp" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">4</div>
+          <div class="s-info"><div class="s-title">Medicine Triage + ECU Lead</div><div class="s-sub">Your report · 8 min</div></div>
+          <div class="s-right"><span class="time-tag">8 min</span><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="two-col">
+            <div class="fg"><label class="fla">Transfers In</label><input class="fin" type="number" placeholder="0"/></div>
+            <div class="fg"><label class="fla">Transfers Out</label><input class="fin" type="number" placeholder="0"/></div>
+          </div>
+          <div class="fg"><label class="fla">Pending Discharges / Transfers</label><textarea class="fta" placeholder="List bed #s or names…" style="min-height:64px"></textarea></div>
+          <hr class="divider">
+          <div class="fg"><label class="fla">Top 3 Prioritizations</label>
+            <div class="nl">
+              <div class="nr"><div class="nb">1</div><input type="text" placeholder="Priority 1…"/></div>
+              <div class="nr"><div class="nb">2</div><input type="text" placeholder="Priority 2…"/></div>
+              <div class="nr"><div class="nb">3</div><input type="text" placeholder="Priority 3…"/></div>
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="fg"><label class="fla">Top 3 Recurring Barriers</label>
+            <div class="nl">
+              <div class="nr"><div class="nb">1</div><input type="text" placeholder="Barrier 1…"/></div>
+              <div class="nr"><div class="nb">2</div><input type="text" placeholder="Barrier 2…"/></div>
+              <div class="nr"><div class="nb">3</div><input type="text" placeholder="Barrier 3…"/></div>
+            </div>
+          </div>
+          <button class="save-btn" onclick="markSaved(this)">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- CARE COORD section -->
+      <div class="section-card role-section" data-roles="crd" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">5</div>
+          <div class="s-info"><div class="s-title">Care Coordination</div><div class="s-sub">Your report · 1 min</div></div>
+          <div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="fg"><label class="fla">Feedback on Transfers / Discharges</label><textarea class="fta" placeholder="Close loop on prior huddle requests…"></textarea></div>
+          <div class="fg"><label class="fla">Potential Solutions</label><textarea class="fta" placeholder="What can Care Coord offer today?" style="min-height:64px"></textarea></div>
+          <button class="save-btn" onclick="markSaved(this)">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- BED PLACEMENT section -->
+      <div class="section-card role-section" data-roles="bed" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">6</div>
+          <div class="s-info"><div class="s-title">Bed Placement</div><div class="s-sub">Your report · 1 min</div></div>
+          <div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="fg"><label class="fla">Close loop on prioritizations</label><textarea class="fta" placeholder="Status of each prioritization request…" style="min-height:64px"></textarea></div>
+          <div class="two-col">
+            <div class="fg"><label class="fla">Beds Available</label><input class="fin" type="text" placeholder="e.g. 3 on 3N"/></div>
+            <div class="fg"><label class="fla">Opening for ED</label><input class="fin" type="text" placeholder="e.g. 2 by 3pm"/></div>
+          </div>
+          <div class="fg"><label class="fla">Feedback &amp; Solutions</label><textarea class="fta" placeholder="Other bed supply context…" style="min-height:64px"></textarea></div>
+          <button class="save-btn" onclick="markSaved(this)">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- IP RN section -->
+      <div class="section-card role-section" data-roles="nur" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">7</div>
+          <div class="s-info"><div class="s-title">IP RN Leadership</div><div class="s-sub">Your report · 1 min</div></div>
+          <div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="fg"><label class="fla">Plan for clearing boarders (beds 9–12)</label><textarea class="fta" placeholder="Specific plan per protected bed…"></textarea></div>
+          <div class="fg"><label class="fla">Action Items / Next Steps</label><textarea class="fta" placeholder="What happens after this huddle…" style="min-height:64px"></textarea></div>
+          <button class="save-btn" onclick="markSaved(this)">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- Other sections (read-only placeholders, shown to all) -->
+      <div class="section-card">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num">4</div>
+          <div class="s-info"><div class="s-title">Medicine Triage + ECU Lead</div><div class="s-sub">Other team · 8 min</div></div>
+          <div class="s-right"><span class="time-tag">8 min</span><div class="s-dot empty"></div><span class="chev">▾</span></div>
+        </div>
+        <div class="s-body"><p style="font-size:13px;color:var(--muted);padding:4px 0">Not yet submitted — will appear in Live View once saved.</p></div>
+      </div>
+      <div class="section-card">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num">5</div>
+          <div class="s-info"><div class="s-title">Care Coordination</div><div class="s-sub">Other team · 1 min</div></div>
+          <div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty"></div><span class="chev">▾</span></div>
+        </div>
+        <div class="s-body"><p style="font-size:13px;color:var(--muted);padding:4px 0">Not yet submitted.</p></div>
+      </div>
+      <div class="section-card">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num">6</div>
+          <div class="s-info"><div class="s-title">Bed Placement</div><div class="s-sub">Other team · 1 min</div></div>
+          <div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty"></div><span class="chev">▾</span></div>
+        </div>
+        <div class="s-body"><p style="font-size:13px;color:var(--muted);padding:4px 0">Not yet submitted.</p></div>
+      </div>
+
+      <div class="scroll-pad"></div>
+    </div><!-- /report -->
+
+    <!-- PAGE: LIVE HUDDLE -->
+    <div id="live" class="page">
+      <div class="live-banner">
+        <div class="lb-left">
+          <div class="lbl">CMO ED Throughput Huddle</div>
+          <div class="title">Tue June 24 · 2:00 PM</div>
+          <div class="pw"><div class="pf"></div></div>
+          <div class="pt">4 of 7 sections complete</div>
+        </div>
+        <div class="live-badge"><div class="live-dot"></div><span class="live-txt">LIVE</span></div>
+      </div>
+
+      <!-- Bed status read -->
+      <div class="read-card">
+        <div class="rh">
+          <div class="rn" style="background:var(--gold);color:var(--dark)">🛏</div>
+          <div class="rm"><div class="r-title">Protected Bed Status</div><div class="r-sub">Updated 12:34 PM · ED Charge</div></div>
+          <div class="s-dot done"></div>
+        </div>
+        <div class="rb">
+          <div>
+            <div class="rfl">Beds 9–12</div>
+            <table class="pt-table">
+              <thead><tr><th>Bed</th><th>Patient / Note</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td><span class="bt">9</span></td><td>Urology · Foley</td><td><span class="stag ok">→ 7W ✓</span></td></tr>
+                <tr><td><span class="bt">10</span></td><td>Pre-liver tx</td><td><span class="stag ok">→ GOU ✓</span></td></tr>
+                <tr><td><span class="bt b">11</span></td><td>Trach · cerebral palsy</td><td><span class="stag warn">Boarding</span></td></tr>
+                <tr><td><span class="bt b">12</span></td><td>Svc capped · ophtho</td><td><span class="stag crit">MICU eval needed</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div>
+            <div class="rfl">Fast Track 22–27</div>
+            <div class="rfv">4 occupied · 2 open (23, 27) · 0 boarding</div>
+          </div>
+          <div style="display:flex;gap:16px">
+            <div><div class="sv red" style="font-size:20px">38</div><div class="sl">Total</div></div>
+            <div><div class="sv amb" style="font-size:20px">12</div><div class="sl">Boarding</div></div>
+            <div><div class="sv grn" style="font-size:20px">2</div><div class="sl">Open</div></div>
+            <div><div class="sv red" style="font-size:20px">6</div><div class="sl">Hi Acuity</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="read-card">
+        <div class="rh"><div class="rn">1</div><div class="rm"><div class="r-title">CMO Overview · All</div><div class="r-sub">4 min</div></div><div class="s-dot done"></div></div>
+        <div class="rb"><div><div class="rfl">Standing question</div><div class="rfv">Should beds 9–12 always be listed? Currently beds always full.</div></div></div>
+      </div>
+
+      <div class="read-card">
+        <div class="rh"><div class="rn">2</div><div class="rm"><div class="r-title">ED Optimizer + Nursing Dir.</div><div class="r-sub">Dr. J. Chen · 10 min</div></div><div class="s-dot done"></div></div>
+        <div class="rb">
+          <div><div class="rfl">Walk Rounds</div><div class="rfv">Walk rounds complete. Bed 12 needs MICU eval — Airborne precautions. Should #12 be upgraded?</div></div>
+          <div><div class="rfl">DESA Escalations</div><div class="rfv">Bed 9 → 7W ✓ &nbsp;·&nbsp; Bed 10 → GOU/5SEMS ✓ &nbsp;·&nbsp; Transport pending both.</div></div>
+          <div><div class="rfl">Top 3 Prioritizations</div><ul class="rlist"><li>H11A — 20+ admissions, expedition to recuperative referral</li><li>H12B — Refused SM/WV transfers, need alt plan</li><li>Bed 12 MICU eval — Airborne, review chart</li></ul></div>
+          <div><div class="rfl">Recurring Barriers</div><ul class="rlist"><li>Close loop on morning escalations</li><li>SM/WV transfer refusals ongoing</li><li>Bed 38 solid onc — transfer to SM pending</li></ul></div>
+        </div>
+      </div>
+
+      <div class="read-card awaiting"><div class="rh"><div class="rn">4</div><div class="rm"><div class="r-title">Medicine Triage + ECU Lead</div><div class="r-sub">8 min</div></div><span class="aw-tag">Awaiting…</span></div></div>
+      <div class="read-card awaiting"><div class="rh"><div class="rn">5</div><div class="rm"><div class="r-title">Care Coordination</div><div class="r-sub">1 min</div></div><span class="aw-tag">Awaiting…</span></div></div>
+      <div class="read-card awaiting"><div class="rh"><div class="rn">6</div><div class="rm"><div class="r-title">Bed Placement</div><div class="r-sub">1 min</div></div><span class="aw-tag">Awaiting…</span></div></div>
+      <div class="read-card awaiting"><div class="rh"><div class="rn">7</div><div class="rm"><div class="r-title">IP RN Leadership</div><div class="r-sub">1 min</div></div><span class="aw-tag">Awaiting…</span></div></div>
+      <div class="scroll-pad"></div>
+    </div>
+
+    <!-- PAGE: ACTIONS -->
+    <div id="actions" class="page">
+      <div class="ah"><h2>Actions</h2><button class="add-btn" onclick="addAction()">+ Add</button></div>
+      <div class="ag-lbl">Today · June 24</div>
+      <div id="action-list">
+        <div class="action-item"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">Transport beds 9 &amp; 10 — verify movement by 3pm</div><div class="ac-foot"><span class="ot">Bed Placement</span><span class="dt">Due today</span></div></div></div>
+        <div class="action-item"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">MICU eval for bed 12 — Airborne precautions, review chart</div><div class="ac-foot"><span class="ot">Hospitalist</span><span class="dt">Urgent</span></div></div></div>
+        <div class="action-item"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">H11A recuperative referral — expedite (20+ admissions)</div><div class="ac-foot"><span class="ot">Care Coord</span><span class="dt">Due today</span></div></div></div>
+        <div class="action-item"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">Bed 38 solid onc — confirm SM transfer plan</div><div class="ac-foot"><span class="ot">Optimizer</span><span class="dt">Due today</span></div></div></div>
+      </div>
+      <div style="margin-top:20px">
+        <div class="ag-lbl">Carried over · June 22</div>
+        <div class="action-item" style="opacity:.55"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">SM/WV transfer refusal policy — escalate to CMO</div><div class="ac-foot"><span class="ot">CMO</span><span class="dt">6/22</span></div></div></div>
+        <div class="action-item" style="opacity:.55"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">Fast Track hallway boarding plan — coordinate with nursing</div><div class="ac-foot"><span class="ot">Nursing Dir.</span><span class="dt">6/22</span></div></div></div>
+      </div>
+      <div class="scroll-pad"></div>
+    </div>
+  </div><!-- /scroll-area -->
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-report" onclick="showPage('report',this)"><span class="ni">📋</span>My Report</button>
+    <button class="nav-btn" id="nav-live" onclick="showPage('live',this)"><span class="ni">📡</span>Live View</button>
+    <button class="nav-btn" id="nav-actions" onclick="showPage('actions',this)"><span class="ni">✅</span>Actions</button>
+  </div>
+</div>
+
+<!-- BED EDIT SHEET -->
+<div class="overlay" id="overlay" onclick="closeSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 id="sheet-title">Bed 9</h3>
+    <p>Tap a status, add a note if needed.</p>
+    <div class="so-grid">
+      <button class="so" onclick="pickStatus('occupied')"><div class="oi">🔴</div><span class="ol">Occupied</span><span class="os">Patient in bed</span></button>
+      <button class="so" onclick="pickStatus('open-bed')"><div class="oi">🟢</div><span class="ol">Open</span><span class="os">Ready for patient</span></button>
+      <button class="so" onclick="pickStatus('boarding')"><div class="oi">🟡</div><span class="ol">Boarding</span><span class="os">Inpatient in ED bed</span></button>
+      <button class="so" onclick="pickStatus('cleaning')"><div class="oi">⚪</div><span class="ol">Cleaning</span><span class="os">EVS in progress</span></button>
+    </div>
+    <textarea class="notes-f" id="bed-note" placeholder="Note — patient name, plan, ETA…"></textarea>
+    <button class="sheet-save" onclick="saveBed()">Update Bed</button>
+  </div>
+</div>
+
+<script>
+const bedState={
+  9:{s:'occupied',n:'Urology · Foley · → 7W ✓'},
+  10:{s:'occupied',n:'Pre-liver tx · Foley · → GOU ✓'},
+  11:{s:'boarding',n:'Trach · cerebral palsy · high complexity'},
+  12:{s:'boarding',n:'Svc capped · ophtho · MICU eval needed'},
+  22:{s:'occupied',n:''},23:{s:'open-bed',n:''},24:{s:'occupied',n:''},
+  25:{s:'cleaning',n:''},26:{s:'occupied',n:''},27:{s:'open-bed',n:''}
+};
+const slbl={occupied:'OCC','open-bed':'OPEN',boarding:'BRDG',cleaning:'CLN'};
+let activeBed=null,pendingStatus=null;
+
+function renderBeds(id,nums){
+  const el=document.getElementById(id);el.innerHTML='';
+  nums.forEach(n=>{
+    const s=bedState[n]||{s:'open-bed',n:''};
+    const b=document.createElement('button');
+    b.className=`bed-btn ${s.s}`;
+    b.innerHTML=`<span class="bn">${n}</span><span class="bs">${slbl[s.s]}</span>`;
+    b.onclick=()=>openSheet(n);el.appendChild(b);
+  });
+}
+
+function openSheet(num){
+  activeBed=num;pendingStatus=bedState[num].s;
+  document.getElementById('sheet-title').textContent=`Bed ${num}`;
+  document.getElementById('bed-note').value=bedState[num].n||'';
+  refreshSoGrid();
+  document.getElementById('overlay').classList.add('open');
+}
+
+const statusCls={'occupied':'sel-occupied','open-bed':'sel-open','boarding':'sel-boarding','cleaning':'sel-cleaning'};
+const statusOrder=['occupied','open-bed','boarding','cleaning'];
+
+function refreshSoGrid(){
+  document.querySelectorAll('.so').forEach((el,i)=>{
+    el.className='so';
+    if(statusOrder[i]===pendingStatus) el.classList.add(statusCls[pendingStatus]);
+  });
+}
+
+function pickStatus(s){pendingStatus=s;refreshSoGrid();}
+
+function saveBed(){
+  if(activeBed){bedState[activeBed].s=pendingStatus;bedState[activeBed].n=document.getElementById('bed-note').value;}
+  closeSheet();
+  renderBeds('beds-9-12',[9,10,11,12]);
+  renderBeds('beds-22-27',[22,23,24,25,26,27]);
+}
+
+function closeSheet(e){
+  if(!e||e.target===document.getElementById('overlay'))
+    document.getElementById('overlay').classList.remove('open');
+}
+
+const roleMap={
+  opt:{label:'Optimizer',cls:'rp-opt',show:['opt-section']},
+  chr:{label:'ED Charge',cls:'rp-chr',show:['chr-section']},
+  ecu:{label:'ECU Charge',cls:'rp-ecu',show:['ecu-section']},
+  cmo:{label:'CMO',cls:'rp-cmo',show:['opt-section']},
+  hsp:{label:'Hospitalist',cls:'rp-hsp',show:['hsp-section']},
+  nur:{label:'Nursing Dir',cls:'rp-nur',show:['opt-section','nur-section']},
+  crd:{label:'Care Coord',cls:'rp-crd',show:['crd-section']},
+  bed:{label:'Bed Place.',cls:'rp-bed',show:['bed-section']},
+  vlu:{label:'ValU',cls:'rp-vlu',show:['opt-section']}
+};
+
+// assign IDs to role sections for easier lookup
+function assignRoleSectionIds(){
+  let chrIdx=0,ecuIdx=0,hspIdx=0,nurIdx=0,crdIdx=0,bedIdx=0;
+  document.querySelectorAll('.role-section').forEach(el=>{
+    const roles=el.getAttribute('data-roles')||'';
+    if(roles.includes('chr')&&!el.id){el.id='chr-section';}
+    if(roles.includes('ecu')&&!el.id){el.id='ecu-section';}
+    if(roles==='hsp'&&!el.id){el.id='hsp-section';}
+    if(roles.includes('nur')&&roles.includes('opt')&&!el.id){}// opt-section already has id
+    if(roles==='nur'&&!el.id){el.id='nur-section';}
+    if(roles==='crd'&&!el.id){el.id='crd-section';}
+    if(roles==='bed'&&!el.id){el.id='bed-section';}
+  });
+}
+
+function signIn(){
+  const key=document.getElementById('role-select').value;
+  const role=roleMap[key]||roleMap['opt'];
+  document.getElementById('login').classList.remove('active');
+  document.getElementById('app').classList.add('active');
+  const pill=document.getElementById('role-pill');
+  pill.textContent=role.label;pill.className='role-pill '+role.cls;
+  // show/hide role sections
+  document.querySelectorAll('.role-section').forEach(el=>{
+    const show=role.show.includes(el.id);
+    el.style.display=show?'block':'none';
+    // make the num mine only if it's their primary section
+    const num=el.querySelector('.s-num');
+    if(num) num.className=show&&role.show[0]===el.id?'s-num mine':'s-num mine';
+  });
+  // adjust opt-section label for non-optimizer roles
+  if(key==='nur'){
+    document.getElementById('opt-num').textContent='2/7';
+    document.getElementById('opt-sub').textContent='Viewing as Nursing Dir · 10 min';
+  }
+  renderBeds('beds-9-12',[9,10,11,12]);
+  renderBeds('beds-22-27',[22,23,24,25,26,27]);
+  startCountdown();
+}
+
+function showPage(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['report','live','actions'][i]===id));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleSec(head){
+  const body=head.nextElementSibling;
+  const chev=head.querySelector('.chev');
+  const open=body.classList.toggle('open');
+  chev.classList.toggle('open',open);
+}
+
+function markSaved(btn){
+  btn.classList.add('saved');btn.textContent='✓ Saved';
+  const dot=btn.closest('.section-card').querySelector('.s-dot');
+  if(dot){dot.className='s-dot done';}
+  setTimeout(()=>{btn.classList.remove('saved');btn.textContent='Save My Report';},2500);
+}
+
+function toggleCheck(btn){
+  btn.classList.toggle('checked');
+  const txt=btn.nextElementSibling.querySelector('.ac-text');
+  txt.classList.toggle('done',btn.classList.contains('checked'));
+}
+
+function addAction(){
+  const text=prompt('Action item:');if(!text)return;
+  const owner=prompt('Owner / role:')||'Unassigned';
+  const list=document.getElementById('action-list');
+  const div=document.createElement('div');div.className='action-item';
+  div.innerHTML=`<button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">${text}</div><div class="ac-foot"><span class="ot">${owner}</span><span class="dt">Just added</span></div></div>`;
+  list.prepend(div);
+}
+
+function startCountdown(){
+  const el=document.getElementById('countdown');
+  const now=new Date();
+  const t=new Date(now);t.setHours(14,0,0,0);
+  if(now>=t)t.setDate(t.getDate()+1);
+  const tick=()=>{
+    const d=t-new Date();
+    if(d<=0){el.textContent='LIVE NOW';el.classList.add('soon');return;}
+    const h=Math.floor(d/3600000),m=Math.floor((d%3600000)/60000),s=Math.floor((d%60000)/1000);
+    el.textContent=`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+    el.classList.toggle('soon',d<1800000);
+  };
+  tick();setInterval(tick,1000);
+}
+
+window.addEventListener('DOMContentLoaded',()=>{assignRoleSectionIds();});
+</script>
+</body>
+</html>
