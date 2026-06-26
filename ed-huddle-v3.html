@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ED Huddle v3 — UCLA Health</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2774AE;--gold:#FFD100;--dark:#003B5C;
+  --bg:#F0F4F8;--surface:#fff;--s2:#F8FAFC;--border:#E2E8F0;
+  --text:#1A202C;--muted:#64748B;--light:#94A3B8;
+  --red:#DC2626;--red-bg:#FEF2F2;
+  --amber:#B45309;--amber-bg:#FFFBEB;
+  --green:#15803D;--green-bg:#F0FDF4;
+  --purple:#7C3AED;--purple-bg:#F5F3FF;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+
+/* ── SCREENS ── */
+.screen{display:none;height:100dvh;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+
+/* ── LOGIN ── */
+#login{background:var(--dark);justify-content:flex-end}
+.login-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px 24px;gap:6px}
+.logo-mark{width:60px;height:60px;background:var(--blue);border-radius:16px;display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:500;color:var(--gold);margin-bottom:10px}
+.login-top h1{font-size:22px;font-weight:700;color:#fff;text-align:center}
+.login-top p{font-size:14px;color:rgba(255,255,255,.5);text-align:center}
+.login-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:28px 20px max(40px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+.fl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:6px}
+.fi,.fs{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'Inter',sans-serif;color:var(--text);background:var(--s2);-webkit-appearance:none;appearance:none}
+.fi:focus,.fs:focus{outline:none;border-color:var(--blue);background:#fff}
+.sw{position:relative}.sw::after{content:'▾';position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.btn-p{width:100%;padding:16px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer}
+.btn-bigscreen{width:100%;padding:13px;background:transparent;color:var(--dark);border:2px solid var(--border);border-radius:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.huddle-chip{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.hc-dot{width:8px;height:8px;border-radius:50%;background:var(--blue)}
+.hc-txt{font-size:13px;color:var(--muted);font-weight:500}
+
+/* ── APP HEADER ── */
+.app-header{background:var(--dark);padding:12px 16px;padding-top:max(12px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:8px}
+.hl{display:flex;align-items:center;gap:10px;min-width:0}
+.h-logo{font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--gold);font-weight:500;white-space:nowrap}
+.h-sep{width:1px;height:18px;background:rgba(255,255,255,.2);flex-shrink:0}
+.h-title{font-size:14px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.header-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.role-pill{padding:5px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.rp-opt{background:rgba(255,209,0,.18);color:var(--gold)}
+.rp-cmo{background:rgba(39,116,174,.4);color:#90CDF4}
+.rp-chr{background:rgba(129,230,217,.2);color:#5EEAD4}
+.rp-ecu{background:rgba(252,165,165,.2);color:#FCA5A5}
+.rp-nur{background:rgba(216,180,254,.2);color:#C4B5FD}
+.rp-hsp{background:rgba(167,243,208,.2);color:#6EE7B7}
+.rp-crd{background:rgba(154,230,180,.2);color:#86EFAC}
+.rp-bed{background:rgba(252,129,74,.2);color:#FB923C}
+.rp-vlu{background:rgba(255,209,0,.15);color:var(--gold)}
+.rp-scr{background:rgba(124,58,237,.35);color:#C4B5FD}
+
+/* ── MASTER TIMER ── */
+.master-timer-bar{background:#001F33;border-bottom:1px solid rgba(255,255,255,.08);padding:8px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.mt-left{display:flex;align-items:center;gap:10px}
+.mt-section-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.45)}
+.mt-section-name{font-size:13px;font-weight:700;color:#fff;max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mt-right{display:flex;align-items:center;gap:8px}
+.lap-clock{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;color:#fff;letter-spacing:.04em;min-width:64px;text-align:right}
+.lap-clock.warn{color:var(--gold)}
+.lap-clock.over{color:#F87171;animation:pulse-red 1s infinite}
+@keyframes pulse-red{0%,100%{opacity:1}50%{opacity:.6}}
+.btn-next-sec{padding:7px 13px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;white-space:nowrap;display:none}
+.btn-next-sec.scribe-only{display:flex;align-items:center;gap:5px}
+.btn-pause{width:30px;height:30px;background:rgba(255,255,255,.1);border:none;border-radius:8px;color:#fff;font-size:14px;cursor:pointer;display:none;align-items:center;justify-content:center;flex-shrink:0}
+.btn-pause.scribe-only{display:flex}
+
+/* ── SCRIBE BANNER ── */
+.scribe-banner{background:var(--purple-bg);border-bottom:2px solid var(--purple);padding:8px 16px;display:none;align-items:center;justify-content:space-between;flex-shrink:0}
+.scribe-banner.active{display:flex}
+.sb-left{display:flex;align-items:center;gap:8px}
+.sb-dot{width:8px;height:8px;border-radius:50%;background:var(--purple);animation:blink 1.5s infinite}
+.sb-text{font-size:12px;font-weight:700;color:var(--purple)}
+.sb-hint{font-size:11px;color:var(--muted)}
+
+/* ── SCROLL + TABS ── */
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 0}
+.tab-bar{display:flex;gap:3px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:4px;margin-bottom:14px;flex-shrink:0}
+.tab{flex:1;padding:10px 4px;border-radius:10px;border:none;background:none;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;transition:all .15s}
+.tab.active{background:var(--dark);color:#fff}
+.page{display:none}.page.active{display:block}
+
+/* ── BED CARDS ── */
+.bed-card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);margin-bottom:12px;overflow:hidden}
+.bc-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 10px}
+.bc-title{font-size:14px;font-weight:700;color:var(--text)}
+.bc-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.edit-hint{font-size:10px;font-weight:600;color:var(--blue);background:#EBF8FF;padding:4px 9px;border-radius:20px;border:1px solid #BEE3F8;white-space:nowrap}
+.bed-row{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 14px}
+.bed-btn{width:56px;height:56px;border-radius:12px;border:2px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:transform .1s;font-family:'Inter',sans-serif;background:none;-webkit-appearance:none}
+.bed-btn:active{transform:scale(.88)}
+.bed-btn .bn{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:500}
+.bed-btn .bs{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.bed-btn.occupied{background:var(--red-bg);border-color:#FCA5A5;color:var(--red)}
+.bed-btn.open-bed{background:var(--green-bg);border-color:#86EFAC;color:var(--green)}
+.bed-btn.boarding{background:var(--amber-bg);border-color:#FCD34D;color:var(--amber)}
+.bed-btn.cleaning{background:#F8FAFC;border-color:#CBD5E1;color:#64748B}
+.bed-legend{display:flex;flex-wrap:wrap;gap:10px;padding:10px 16px 14px;border-top:1px solid var(--border)}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.ld{width:10px;height:10px;border-radius:3px}
+.ld.occupied{background:var(--red)}.ld.open-bed{background:var(--green)}.ld.boarding{background:#D97706}.ld.cleaning{background:#94A3B8}
+
+/* ── CENSUS ── */
+.census-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+.stat-tile{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center}
+.sv{font-family:'JetBrains Mono',monospace;font-size:26px;font-weight:700;line-height:1}
+.sv.red{color:var(--red)}.sv.amb{color:var(--amber)}.sv.grn{color:var(--green)}
+.sl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-top:4px}
+.census-owner{font-size:10px;color:var(--muted);text-align:right;margin-bottom:12px;padding-right:2px}
+
+/* ── SECTION CARDS ── */
+.section-card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.section-card.active-section{border-color:var(--blue);box-shadow:0 0 0 3px rgba(39,116,174,.12)}
+.s-head{display:flex;align-items:center;padding:16px;gap:12px;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}
+.s-num{width:32px;height:32px;flex-shrink:0;background:var(--dark);color:#fff;border-radius:8px;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:500;display:flex;align-items:center;justify-content:center}
+.s-num.mine{background:var(--blue)}
+.s-info{flex:1;min-width:0}
+.s-title{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.s-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.time-tag{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:3px 7px;border-radius:6px}
+.s-dot{width:9px;height:9px;border-radius:50%}
+.s-dot.done{background:var(--green)}.s-dot.draft{background:#F59E0B}.s-dot.empty{background:var(--border)}
+.chev{color:var(--light);font-size:11px;transition:transform .2s}
+.chev.open{transform:rotate(180deg)}
+.s-body{padding:0 16px 18px;display:none}
+.s-body.open{display:block}
+
+/* ── SECTION LAP TIME ── */
+.section-lap{display:flex;align-items:center;gap:6px;margin-bottom:12px;padding:8px 12px;background:var(--s2);border-radius:10px;border:1px solid var(--border)}
+.sl-icon{font-size:14px}
+.sl-label{font-size:11px;color:var(--muted);font-weight:600}
+.sl-time{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;color:var(--text);margin-left:auto}
+.sl-allotted{font-size:10px;color:var(--light)}
+
+/* ── FORM FIELDS ── */
+.fg{margin-bottom:14px}.fg:last-child{margin-bottom:0}
+.fla{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:7px}
+.fin{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--s2);-webkit-appearance:none}
+.fin:focus{outline:none;border-color:var(--blue);background:#fff}
+.fta{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--s2);resize:none;line-height:1.5;min-height:80px}
+.fta:focus{outline:none;border-color:var(--blue);background:#fff}
+.nl{display:flex;flex-direction:column;gap:8px}
+.nr{display:flex;align-items:center;gap:10px}
+.nb{width:24px;height:24px;flex-shrink:0;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.nr input{flex:1;padding:12px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--s2);-webkit-appearance:none}
+.nr input:focus{outline:none;border-color:var(--blue);background:#fff}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.save-btn{width:100%;padding:14px;margin-top:16px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:background .15s}
+.save-btn.saved{background:var(--green)}
+.census-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ct{background:var(--s2);border:1.5px solid var(--border);border-radius:12px;padding:12px}
+.ct label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);display:block;margin-bottom:6px}
+.ct input{width:100%;font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--text);border:none;background:none;padding:0;-webkit-appearance:none}
+.ct input:focus{outline:none;color:var(--blue)}
+
+/* ── LIVE VIEW ── */
+.live-banner{background:var(--dark);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.lb-left .lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.45)}
+.lb-left .title{font-size:17px;font-weight:700;color:#fff;margin:3px 0 8px}
+.pw{background:rgba(255,255,255,.12);border-radius:4px;height:4px;width:140px}
+.pf{height:100%;border-radius:4px;background:var(--gold);transition:width .4s}
+.pt{font-size:10px;color:rgba(255,255,255,.5);margin-top:5px}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);padding:8px 13px;border-radius:20px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;animation:blink 1.5s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+.live-txt{font-size:12px;font-weight:700;color:#fff}
+.read-card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);margin-bottom:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.read-card.current-live{border-color:var(--blue);box-shadow:0 0 0 3px rgba(39,116,174,.12)}
+.rh{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.rn{width:30px;height:30px;border-radius:8px;background:var(--dark);color:#fff;font-family:'JetBrains Mono',monospace;font-size:12px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rm{flex:1}.r-title{font-size:14px;font-weight:700}.r-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.rb{padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.rfl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:4px}
+.rfv{font-size:13px;color:var(--text);line-height:1.6}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:4px}
+.rlist li{font-size:13px;color:var(--text);padding-left:14px;position:relative;line-height:1.5}
+.rlist li::before{content:'–';position:absolute;left:0;color:var(--light)}
+.awaiting{opacity:.4;pointer-events:none}
+.aw-tag{font-size:11px;font-weight:600;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
+.pt-table{width:100%;border-collapse:collapse;margin-top:8px}
+.pt-table th{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1.5px solid var(--border)}
+.pt-table td{font-size:12px;padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+.pt-table tr:last-child td{border-bottom:none}
+.bt{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;background:var(--blue);color:#fff;padding:2px 7px;border-radius:5px}
+.bt.b{background:#D97706}
+.stag{font-size:10px;font-weight:700}
+.stag.ok{color:var(--green)}.stag.warn{color:var(--amber)}.stag.crit{color:var(--red)}
+
+/* ── ACTIONS ── */
+.ah{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ah h2{font-size:18px;font-weight:700}
+.add-btn{padding:9px 15px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer}
+.ag-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:8px}
+.action-item{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+.ac{width:22px;height:22px;flex-shrink:0;border:2px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px;-webkit-tap-highlight-color:transparent;transition:all .15s;background:none}
+.ac.checked{background:var(--green);border-color:var(--green)}
+.ac.checked::after{content:'✓';font-size:12px;color:#fff;font-weight:700}
+.ac-body{flex:1;min-width:0}
+.ac-text{font-size:14px;color:var(--text);line-height:1.4}
+.ac-text.done{text-decoration:line-through;color:var(--muted)}
+.ac-foot{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.ot{font-size:10px;font-weight:700;background:var(--s2);border:1px solid var(--border);padding:3px 8px;border-radius:6px;color:var(--muted)}
+.dt{font-size:10px;color:var(--light);padding:3px 0}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0;padding-bottom:max(8px,env(safe-area-inset-bottom));flex-shrink:0}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 20px;border-radius:10px;border:none;background:none;font-size:10px;font-weight:600;color:var(--muted);font-family:'Inter',sans-serif;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.nav-btn.active{color:var(--blue)}
+.ni{font-size:20px}
+
+/* ── SHEET OVERLAY ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end}
+.overlay.open{display:flex}
+.sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px max(40px,env(safe-area-inset-bottom));width:100%;max-height:75dvh;overflow-y:auto}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 20px}
+.sheet h3{font-size:18px;font-weight:700;margin-bottom:4px}
+.sheet p{font-size:13px;color:var(--muted);margin-bottom:18px}
+.so-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.so{padding:16px 12px;border-radius:14px;border:2px solid var(--border);text-align:center;cursor:pointer;font-family:'Inter',sans-serif;-webkit-tap-highlight-color:transparent;transition:all .15s;background:none}
+.so .oi{font-size:24px;margin-bottom:4px}
+.so .ol{font-size:12px;font-weight:700;display:block}
+.so .os{font-size:10px;color:var(--muted);margin-top:2px;display:block}
+.so.sel-occupied{background:var(--red-bg);border-color:var(--red)}
+.so.sel-open{background:var(--green-bg);border-color:var(--green)}
+.so.sel-boarding{background:var(--amber-bg);border-color:#D97706}
+.so.sel-cleaning{background:#F1F5F9;border-color:#64748B}
+.notes-f{width:100%;margin-top:14px;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Inter',sans-serif;background:var(--s2);color:var(--text);resize:none;min-height:72px}
+.notes-f:focus{outline:none;border-color:var(--blue);background:#fff}
+.sheet-save{width:100%;margin-top:14px;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer}
+
+/* ── SCRIBE NOTES SECTION ── */
+.scribe-notes-card{background:var(--purple-bg);border:2px solid var(--purple);border-radius:16px;margin-bottom:12px;overflow:hidden}
+.scribe-notes-head{padding:14px 16px;display:flex;align-items:center;gap:10px}
+.scribe-notes-head .s-num{background:var(--purple)}
+.scribe-notes-title{font-size:14px;font-weight:700;color:var(--purple)}
+.scribe-notes-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.scribe-notes-body{padding:0 16px 16px}
+.scribe-section-select{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'Inter',sans-serif;color:var(--text);background:var(--surface);margin-bottom:10px;-webkit-appearance:none}
+.scribe-target-display{min-height:64px;padding:12px 14px;background:var(--surface);border:1.5px solid var(--purple);border-radius:12px;font-size:13px;line-height:1.6;color:var(--text)}
+
+/* ── ADD ACTION SHEET ── */
+.action-sheet-fields{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+
+/* ── BIG SCREEN ── */
+#bigscreen{background:#001828;overflow:hidden}
+.bs-header{background:#000E18;border-bottom:1px solid rgba(255,255,255,.08);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.bs-logo{font-family:'JetBrains Mono',monospace;font-size:14px;color:var(--gold);font-weight:600}
+.bs-title{font-size:20px;font-weight:700;color:#fff}
+.bs-meta{font-size:13px;color:rgba(255,255,255,.45)}
+.bs-timer-block{display:flex;align-items:center;gap:16px}
+.bs-section-badge{background:rgba(39,116,174,.3);border:1px solid rgba(39,116,174,.5);border-radius:10px;padding:6px 14px}
+.bs-section-name{font-size:12px;font-weight:700;color:#90CDF4}
+.bs-clock{font-family:'JetBrains Mono',monospace;font-size:36px;font-weight:600;color:#fff;letter-spacing:.04em}
+.bs-clock.warn{color:var(--gold)}
+.bs-clock.over{color:#F87171}
+.bs-live-dot{width:8px;height:8px;border-radius:50%;background:#4ADE80;animation:blink 1.5s infinite}
+.bs-scroll{flex:1;overflow-y:auto;padding:24px 32px}
+.bs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1400px;margin:0 auto}
+.bs-card{background:#00253D;border:1.5px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.bs-card.active-now{border-color:var(--blue);box-shadow:0 0 0 3px rgba(39,116,174,.25)}
+.bs-card-head{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.bs-num{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);font-family:'JetBrains Mono',monospace;font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bs-num.active{background:var(--blue);color:#fff}
+.bs-card-title{font-size:13px;font-weight:700;color:#fff}
+.bs-card-sub{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
+.bs-status{margin-left:auto;display:flex;align-items:center;gap:6px}
+.bs-dot{width:7px;height:7px;border-radius:50%}
+.bs-dot.done{background:#4ADE80}.bs-dot.draft{background:#FBBF24}.bs-dot.empty{background:rgba(255,255,255,.2)}
+.bs-card-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.bs-field-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.35);margin-bottom:3px}
+.bs-field-val{font-size:12px;color:rgba(255,255,255,.85);line-height:1.5}
+.bs-awaiting{padding:14px 16px;font-size:12px;color:rgba(255,255,255,.3);font-style:italic}
+.bs-stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1400px;margin:0 auto 16px}
+.bs-stat{background:#00253D;border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;text-align:center}
+.bs-sv{font-family:'JetBrains Mono',monospace;font-size:32px;font-weight:700;line-height:1}
+.bs-sv.red{color:#F87171}.bs-sv.amb{color:#FBBF24}.bs-sv.grn{color:#4ADE80}
+.bs-sl{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:rgba(255,255,255,.4);margin-top:5px}
+.bs-progress-bar{max-width:1400px;margin:0 auto 16px;background:rgba(255,255,255,.06);border-radius:8px;height:6px;overflow:hidden}
+.bs-progress-fill{height:100%;background:var(--blue);border-radius:8px;transition:width .5s}
+.bs-footer{padding:12px 32px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:between;gap:16px;flex-shrink:0}
+.bs-footer-note{font-size:11px;color:rgba(255,255,255,.3)}
+.bs-open-btn{padding:8px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(255,255,255,.6);font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;margin-left:auto}
+.scroll-pad{height:20px}
+
+/* ── SCRIBE EDIT OVERLAY ── */
+.scribe-edit-hint{font-size:10px;font-weight:700;color:var(--purple);background:var(--purple-bg);padding:3px 8px;border-radius:6px;border:1px solid rgba(124,58,237,.3);display:none}
+.is-scribe .scribe-edit-hint{display:inline-block}
+</style>
+</head>
+<body>
+
+<!-- ══ LOGIN ══ -->
+<div id="login" class="screen active">
+  <div class="login-top">
+    <div class="logo-mark">ValU</div>
+    <h1>ED Throughput Huddle</h1>
+    <p>UCLA Health · Daily 2:00 PM</p>
+  </div>
+  <div class="login-sheet">
+    <div><label class="fl">Email</label><input class="fi" type="email" id="email-input" value="j.chen@ucla.edu"/></div>
+    <div><label class="fl">My Role</label>
+      <div class="sw"><select class="fs" id="role-select">
+        <option value="opt">ED Optimizer (Physician)</option>
+        <option value="chr">ED Charge Nurse</option>
+        <option value="ecu">ECU Charge Nurse</option>
+        <option value="cmo">CMO / Executive</option>
+        <option value="hsp">Hospitalist Triage Officer</option>
+        <option value="nur">ED Nursing Director</option>
+        <option value="crd">Care Coordination</option>
+        <option value="bed">Bed Placement</option>
+        <option value="scr">Scribe / Recorder</option>
+        <option value="vlu">ValU Team (Facilitator)</option>
+      </select></div>
+    </div>
+    <button class="btn-p" onclick="signIn()">Sign in →</button>
+    <button class="btn-bigscreen" onclick="openBigScreen()">🖥 Open Big Screen Dashboard</button>
+    <div class="huddle-chip"><div class="hc-dot"></div><span class="hc-txt">Next huddle: Tue Jun 24 · 2:00 PM</span></div>
+  </div>
+</div>
+
+<!-- ══ MAIN APP ══ -->
+<div id="app" class="screen">
+  <div class="app-header">
+    <div class="hl">
+      <span class="h-logo">ValU</span>
+      <div class="h-sep"></div>
+      <span class="h-title">ED Huddle · 6/24</span>
+    </div>
+    <div class="header-right">
+      <span class="role-pill rp-opt" id="role-pill">Optimizer</span>
+    </div>
+  </div>
+
+  <!-- Master Timer Bar -->
+  <div class="master-timer-bar">
+    <div class="mt-left">
+      <div>
+        <div class="mt-section-label">Now in</div>
+        <div class="mt-section-name" id="mt-section-name">Pre-Huddle</div>
+      </div>
+    </div>
+    <div class="mt-right">
+      <div class="lap-clock" id="lap-clock">0:00</div>
+      <button class="btn-pause scribe-only" id="btn-pause" onclick="togglePause()" title="Pause/Resume">⏸</button>
+      <button class="btn-next-sec scribe-only" id="btn-next-sec" onclick="nextSection()">Next ›</button>
+    </div>
+  </div>
+
+  <!-- Scribe Banner -->
+  <div class="scribe-banner" id="scribe-banner">
+    <div class="sb-left">
+      <div class="sb-dot"></div>
+      <span class="sb-text">SCRIBE MODE</span>
+      <span class="sb-hint">You can edit any section</span>
+    </div>
+  </div>
+
+  <div class="scroll-area">
+    <div class="tab-bar">
+      <button class="tab active" onclick="showPage('report',this)">My Report</button>
+      <button class="tab" onclick="showPage('live',this)">Live Huddle</button>
+      <button class="tab" onclick="showPage('actions',this)">Actions</button>
+    </div>
+
+    <!-- ── MY REPORT PAGE ── -->
+    <div id="report" class="page active">
+
+      <!-- Bed cards -->
+      <div class="bed-card">
+        <div class="bc-head"><div><div class="bc-title">Protected Beds · 9–12</div><div class="bc-sub">Goal: keep open for resus / high acuity</div></div><span class="edit-hint">Tap to update</span></div>
+        <div class="bed-row" id="beds-9-12"></div>
+        <div class="bed-legend"><div class="li"><div class="ld occupied"></div>Occupied</div><div class="li"><div class="ld open-bed"></div>Open</div><div class="li"><div class="ld boarding"></div>Boarding</div><div class="li"><div class="ld cleaning"></div>Cleaning</div></div>
+      </div>
+      <div class="bed-card">
+        <div class="bc-head"><div><div class="bc-title">Fast Track · 22–27</div><div class="bc-sub">Goal: available for lower-acuity patients</div></div><span class="edit-hint">Tap to update</span></div>
+        <div class="bed-row" id="beds-22-27"></div>
+        <div class="bed-legend"><div class="li"><div class="ld occupied"></div>Occupied</div><div class="li"><div class="ld open-bed"></div>Open</div><div class="li"><div class="ld boarding"></div>Boarding</div><div class="li"><div class="ld cleaning"></div>Cleaning</div></div>
+      </div>
+
+      <!-- Census Stats -->
+      <div class="census-bar">
+        <div class="stat-tile"><div class="sv red" id="stat-t">38</div><div class="sl">Census</div></div>
+        <div class="stat-tile"><div class="sv amb" id="stat-b">12</div><div class="sl">Boarding</div></div>
+        <div class="stat-tile"><div class="sv grn" id="stat-o">2</div><div class="sl">Open</div></div>
+        <div class="stat-tile"><div class="sv red" id="stat-a">6</div><div class="sl">Hi Acuity</div></div>
+      </div>
+      <div class="census-owner">Updated by ED Charge + ECU Charge</div>
+
+      <!-- SCRIBE NOTES (scribe only) -->
+      <div class="scribe-notes-card" id="scribe-notes-card" style="display:none">
+        <div class="scribe-notes-head">
+          <div class="s-num" style="background:var(--purple)">✏️</div>
+          <div><div class="scribe-notes-title">Scribe Notes</div><div class="scribe-notes-sub">Jump to any section below</div></div>
+        </div>
+        <div class="scribe-notes-body">
+          <label class="fla">Edit section</label>
+          <div class="sw" style="margin-bottom:10px"><select class="scribe-section-select" id="scribe-jump" onchange="scribeJump(this.value)">
+            <option value="">— select section —</option>
+            <option value="sec-chr">ED Census Entry (Charge Nurse)</option>
+            <option value="sec-ecu">ECU Boarder Census</option>
+            <option value="sec-opt">ED Optimizer / Nursing Dir.</option>
+            <option value="sec-hsp">Medicine Triage + ECU Lead</option>
+            <option value="sec-crd">Care Coordination</option>
+            <option value="sec-bed">Bed Placement</option>
+            <option value="sec-nur">IP RN Leadership</option>
+          </select></div>
+          <div class="fg">
+            <label class="fla">Global scribe notes (broadcast to big screen)</label>
+            <textarea class="fta" id="scribe-global-notes" placeholder="Live notes for the room…" oninput="syncScribeNotes()"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- ED Charge Nurse section -->
+      <div class="section-card role-section" id="sec-chr" data-roles="chr scr" data-allotted="3" data-section-index="0" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">C</div>
+          <div class="s-info"><div class="s-title">ED Census Entry</div><div class="s-sub">ED Charge Nurse · your report</div></div>
+          <div class="s-right"><div class="s-dot draft"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="section-lap" id="lap-sec-chr"><span class="sl-icon">⏱</span><span class="sl-label">Section time</span><span class="sl-time" id="laptime-sec-chr">—</span><span class="sl-allotted">/ 3 min allotted</span></div>
+          <div class="census-grid">
+            <div class="ct"><label>Total ED Pts</label><input type="number" id="f-total" value="38" oninput="syncCensus()"/></div>
+            <div class="ct"><label>Boarding</label><input type="number" id="f-board" value="12" oninput="syncCensus()"/></div>
+            <div class="ct"><label>Open Beds</label><input type="number" id="f-open" value="2" oninput="syncCensus()"/></div>
+            <div class="ct"><label>High Acuity</label><input type="number" id="f-acuity" value="6" oninput="syncCensus()"/></div>
+          </div>
+          <div class="fg"><label class="fla">Flags / notable patients</label><textarea class="fta" id="f-chr-flags" oninput="syncSection('chr')">Bed 11 — trach/cerebral palsy, high complexity. Hall near 12 may need upgrade.</textarea></div>
+          <button class="save-btn" onclick="markSaved(this,'chr')">Save Census</button>
+        </div>
+      </div>
+
+      <!-- ECU section -->
+      <div class="section-card role-section" id="sec-ecu" data-roles="ecu scr" data-allotted="3" data-section-index="1" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">E</div>
+          <div class="s-info"><div class="s-title">ECU Boarder Census</div><div class="s-sub">ECU Charge Nurse · your report</div></div>
+          <div class="s-right"><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="section-lap" id="lap-sec-ecu"><span class="sl-icon">⏱</span><span class="sl-label">Section time</span><span class="sl-time" id="laptime-sec-ecu">—</span><span class="sl-allotted">/ 3 min allotted</span></div>
+          <div class="census-grid">
+            <div class="ct"><label>ECU Boarders</label><input type="number" id="f-ecu-boarders" placeholder="0" oninput="syncSection('ecu')"/></div>
+            <div class="ct"><label>Hall Boarders</label><input type="number" id="f-ecu-hall" placeholder="0" oninput="syncSection('ecu')"/></div>
+          </div>
+          <div class="fg"><label class="fla">Boarder status &amp; flags</label><textarea class="fta" id="f-ecu-flags" placeholder="Who is boarding, status, plan for each…" oninput="syncSection('ecu')"></textarea></div>
+          <button class="save-btn" onclick="markSaved(this,'ecu')">Save ECU Report</button>
+        </div>
+      </div>
+
+      <!-- Optimizer section -->
+      <div class="section-card role-section" id="sec-opt" data-roles="opt nur vlu cmo scr" data-allotted="10" data-section-index="2">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine" id="opt-num">2</div>
+          <div class="s-info"><div class="s-title">ED Optimizer + Nursing Dir.</div><div class="s-sub" id="opt-sub">Your report · 10 min</div></div>
+          <div class="s-right"><span class="time-tag">10 min</span><div class="s-dot draft"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="section-lap" id="lap-sec-opt"><span class="sl-icon">⏱</span><span class="sl-label">Section time</span><span class="sl-time" id="laptime-sec-opt">—</span><span class="sl-allotted">/ 10 min allotted</span></div>
+          <div class="fg"><label class="fla">Walk Rounds Summary</label><textarea class="fta" id="f-opt-rounds" oninput="syncSection('opt')">Walk rounds complete. Bed 12 needs MICU eval — Airborne precautions. Should #12 be upgraded?</textarea></div>
+          <div class="fg"><label class="fla">DESA Escalations</label><textarea class="fta" id="f-opt-desa" oninput="syncSection('opt')">Bed 9 (urology/Foley) → 7W ✓&#10;Bed 10 (pre-liver tx/Foley) → GOU/5SEMS ✓&#10;Transport pending both.</textarea></div>
+          <hr class="divider">
+          <div class="fg"><label class="fla">Top 3 Prioritizations</label>
+            <div class="nl">
+              <div class="nr"><div class="nb">1</div><input type="text" id="f-opt-p1" value="H11A — 20+ admissions, expedition to recuperative referral" oninput="syncSection('opt')"/></div>
+              <div class="nr"><div class="nb">2</div><input type="text" id="f-opt-p2" value="H12B — Refused SM/WV transfers, need alt plan" oninput="syncSection('opt')"/></div>
+              <div class="nr"><div class="nb">3</div><input type="text" id="f-opt-p3" value="Bed 12 MICU eval — Airborne, review chart" oninput="syncSection('opt')"/></div>
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="fg"><label class="fla">Top 3 Recurring Barriers</label>
+            <div class="nl">
+              <div class="nr"><div class="nb">1</div><input type="text" id="f-opt-b1" value="Close loop on morning escalations" oninput="syncSection('opt')"/></div>
+              <div class="nr"><div class="nb">2</div><input type="text" id="f-opt-b2" value="SM/WV transfer refusals ongoing" oninput="syncSection('opt')"/></div>
+              <div class="nr"><div class="nb">3</div><input type="text" id="f-opt-b3" value="Bed 38 solid onc — transfer to SM pending" oninput="syncSection('opt')"/></div>
+            </div>
+          </div>
+          <button class="save-btn" onclick="markSaved(this,'opt')">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- Hospitalist section -->
+      <div class="section-card role-section" id="sec-hsp" data-roles="hsp scr" data-allotted="8" data-section-index="3" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">4</div>
+          <div class="s-info"><div class="s-title">Medicine Triage + ECU Lead</div><div class="s-sub">Your report · 8 min</div></div>
+          <div class="s-right"><span class="time-tag">8 min</span><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="section-lap" id="lap-sec-hsp"><span class="sl-icon">⏱</span><span class="sl-label">Section time</span><span class="sl-time" id="laptime-sec-hsp">—</span><span class="sl-allotted">/ 8 min allotted</span></div>
+          <div class="two-col">
+            <div class="fg"><label class="fla">Transfers In</label><input class="fin" type="number" id="f-hsp-in" placeholder="0" oninput="syncSection('hsp')"/></div>
+            <div class="fg"><label class="fla">Transfers Out</label><input class="fin" type="number" id="f-hsp-out" placeholder="0" oninput="syncSection('hsp')"/></div>
+          </div>
+          <div class="fg"><label class="fla">Pending Discharges / Transfers</label><textarea class="fta" id="f-hsp-pending" placeholder="List bed #s or names…" style="min-height:64px" oninput="syncSection('hsp')"></textarea></div>
+          <hr class="divider">
+          <div class="fg"><label class="fla">Top 3 Prioritizations</label>
+            <div class="nl">
+              <div class="nr"><div class="nb">1</div><input type="text" id="f-hsp-p1" placeholder="Priority 1…" oninput="syncSection('hsp')"/></div>
+              <div class="nr"><div class="nb">2</div><input type="text" id="f-hsp-p2" placeholder="Priority 2…" oninput="syncSection('hsp')"/></div>
+              <div class="nr"><div class="nb">3</div><input type="text" id="f-hsp-p3" placeholder="Priority 3…" oninput="syncSection('hsp')"/></div>
+            </div>
+          </div>
+          <hr class="divider">
+          <div class="fg"><label class="fla">Top 3 Recurring Barriers</label>
+            <div class="nl">
+              <div class="nr"><div class="nb">1</div><input type="text" id="f-hsp-b1" placeholder="Barrier 1…" oninput="syncSection('hsp')"/></div>
+              <div class="nr"><div class="nb">2</div><input type="text" id="f-hsp-b2" placeholder="Barrier 2…" oninput="syncSection('hsp')"/></div>
+              <div class="nr"><div class="nb">3</div><input type="text" id="f-hsp-b3" placeholder="Barrier 3…" oninput="syncSection('hsp')"/></div>
+            </div>
+          </div>
+          <button class="save-btn" onclick="markSaved(this,'hsp')">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- Care Coord section -->
+      <div class="section-card role-section" id="sec-crd" data-roles="crd scr" data-allotted="1" data-section-index="4" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">5</div>
+          <div class="s-info"><div class="s-title">Care Coordination</div><div class="s-sub">Your report · 1 min</div></div>
+          <div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="section-lap" id="lap-sec-crd"><span class="sl-icon">⏱</span><span class="sl-label">Section time</span><span class="sl-time" id="laptime-sec-crd">—</span><span class="sl-allotted">/ 1 min allotted</span></div>
+          <div class="fg"><label class="fla">Feedback on Transfers / Discharges</label><textarea class="fta" id="f-crd-feedback" placeholder="Close loop on prior huddle requests…" oninput="syncSection('crd')"></textarea></div>
+          <div class="fg"><label class="fla">Potential Solutions</label><textarea class="fta" id="f-crd-solutions" placeholder="What can Care Coord offer today?" style="min-height:64px" oninput="syncSection('crd')"></textarea></div>
+          <button class="save-btn" onclick="markSaved(this,'crd')">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- Bed Placement section -->
+      <div class="section-card role-section" id="sec-bed" data-roles="bed scr" data-allotted="1" data-section-index="5" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">6</div>
+          <div class="s-info"><div class="s-title">Bed Placement</div><div class="s-sub">Your report · 1 min</div></div>
+          <div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="section-lap" id="lap-sec-bed"><span class="sl-icon">⏱</span><span class="sl-label">Section time</span><span class="sl-time" id="laptime-sec-bed">—</span><span class="sl-allotted">/ 1 min allotted</span></div>
+          <div class="fg"><label class="fla">Close loop on prioritizations</label><textarea class="fta" id="f-bed-loop" placeholder="Status of each prioritization request…" style="min-height:64px" oninput="syncSection('bed')"></textarea></div>
+          <div class="two-col">
+            <div class="fg"><label class="fla">Beds Available</label><input class="fin" type="text" id="f-bed-avail" placeholder="e.g. 3 on 3N" oninput="syncSection('bed')"/></div>
+            <div class="fg"><label class="fla">Opening for ED</label><input class="fin" type="text" id="f-bed-opening" placeholder="e.g. 2 by 3pm" oninput="syncSection('bed')"/></div>
+          </div>
+          <div class="fg"><label class="fla">Feedback &amp; Solutions</label><textarea class="fta" id="f-bed-feedback" placeholder="Other bed supply context…" style="min-height:64px" oninput="syncSection('bed')"></textarea></div>
+          <button class="save-btn" onclick="markSaved(this,'bed')">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- IP RN Leadership section -->
+      <div class="section-card role-section" id="sec-nur" data-roles="nur scr" data-allotted="1" data-section-index="6" style="display:none">
+        <div class="s-head" onclick="toggleSec(this)">
+          <div class="s-num mine">7</div>
+          <div class="s-info"><div class="s-title">IP RN Leadership</div><div class="s-sub">Your report · 1 min</div></div>
+          <div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty"></div><span class="chev open">▾</span></div>
+        </div>
+        <div class="s-body open">
+          <div class="section-lap" id="lap-sec-nur"><span class="sl-icon">⏱</span><span class="sl-label">Section time</span><span class="sl-time" id="laptime-sec-nur">—</span><span class="sl-allotted">/ 1 min allotted</span></div>
+          <div class="fg"><label class="fla">Plan for clearing boarders (beds 9–12)</label><textarea class="fta" id="f-nur-plan" placeholder="Specific plan per protected bed…" oninput="syncSection('nur')"></textarea></div>
+          <div class="fg"><label class="fla">Action Items / Next Steps</label><textarea class="fta" id="f-nur-actions" placeholder="What happens after this huddle…" style="min-height:64px" oninput="syncSection('nur')"></textarea></div>
+          <button class="save-btn" onclick="markSaved(this,'nur')">Save My Report</button>
+        </div>
+      </div>
+
+      <!-- Other teams (read-only stubs) -->
+      <div class="section-card other-team-card" data-sec="hsp"><div class="s-head" onclick="toggleSec(this)"><div class="s-num">4</div><div class="s-info"><div class="s-title">Medicine Triage + ECU Lead</div><div class="s-sub">Other team · 8 min</div></div><div class="s-right"><span class="time-tag">8 min</span><div class="s-dot empty" id="dot-hsp"></div><span class="chev">▾</span></div></div><div class="s-body"><p style="font-size:13px;color:var(--muted);padding:4px 0" id="preview-hsp">Not yet submitted — will appear in Live View once saved.</p></div></div>
+      <div class="section-card other-team-card" data-sec="crd"><div class="s-head" onclick="toggleSec(this)"><div class="s-num">5</div><div class="s-info"><div class="s-title">Care Coordination</div><div class="s-sub">Other team · 1 min</div></div><div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty" id="dot-crd"></div><span class="chev">▾</span></div></div><div class="s-body"><p style="font-size:13px;color:var(--muted);padding:4px 0" id="preview-crd">Not yet submitted.</p></div></div>
+      <div class="section-card other-team-card" data-sec="bed"><div class="s-head" onclick="toggleSec(this)"><div class="s-num">6</div><div class="s-info"><div class="s-title">Bed Placement</div><div class="s-sub">Other team · 1 min</div></div><div class="s-right"><span class="time-tag">1 min</span><div class="s-dot empty" id="dot-bed"></div><span class="chev">▾</span></div></div><div class="s-body"><p style="font-size:13px;color:var(--muted);padding:4px 0" id="preview-bed">Not yet submitted.</p></div></div>
+
+      <div class="scroll-pad"></div>
+    </div>
+
+    <!-- ── LIVE HUDDLE PAGE ── -->
+    <div id="live" class="page">
+      <div class="live-banner">
+        <div class="lb-left">
+          <div class="lbl">CMO ED Throughput Huddle</div>
+          <div class="title">Tue June 24 · 2:00 PM</div>
+          <div class="pw"><div class="pf" id="live-progress" style="width:57%"></div></div>
+          <div class="pt" id="live-progress-text">4 of 7 sections complete</div>
+        </div>
+        <div class="live-badge"><div class="live-dot"></div><span class="live-txt">LIVE</span></div>
+      </div>
+
+      <div class="read-card">
+        <div class="rh"><div class="rn" style="background:var(--gold);color:var(--dark)">🛏</div><div class="rm"><div class="r-title">Protected Bed Status</div><div class="r-sub" id="live-bed-updated">Updated 12:34 PM · ED Charge</div></div><div class="s-dot done"></div></div>
+        <div class="rb">
+          <div><div class="rfl">Beds 9–12</div>
+            <table class="pt-table"><thead><tr><th>Bed</th><th>Patient / Note</th><th>Status</th></tr></thead>
+            <tbody id="live-bed-table">
+              <tr><td><span class="bt">9</span></td><td>Urology · Foley</td><td><span class="stag ok">→ 7W ✓</span></td></tr>
+              <tr><td><span class="bt">10</span></td><td>Pre-liver tx</td><td><span class="stag ok">→ GOU ✓</span></td></tr>
+              <tr><td><span class="bt b">11</span></td><td>Trach · cerebral palsy</td><td><span class="stag warn">Boarding</span></td></tr>
+              <tr><td><span class="bt b">12</span></td><td>Svc capped · ophtho</td><td><span class="stag crit">MICU eval needed</span></td></tr>
+            </tbody></table>
+          </div>
+          <div><div class="rfl">Fast Track 22–27</div><div class="rfv">4 occupied · 2 open (23, 27) · 0 boarding</div></div>
+          <div style="display:flex;gap:16px">
+            <div><div class="sv red" id="live-stat-t" style="font-size:20px">38</div><div class="sl">Total</div></div>
+            <div><div class="sv amb" id="live-stat-b" style="font-size:20px">12</div><div class="sl">Boarding</div></div>
+            <div><div class="sv grn" id="live-stat-o" style="font-size:20px">2</div><div class="sl">Open</div></div>
+            <div><div class="sv red" id="live-stat-a" style="font-size:20px">6</div><div class="sl">Hi Acuity</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="read-card"><div class="rh"><div class="rn">1</div><div class="rm"><div class="r-title">CMO Overview · All</div><div class="r-sub">4 min</div></div><div class="s-dot done"></div></div><div class="rb"><div><div class="rfl">Standing question</div><div class="rfv">Should beds 9–12 always be listed? Currently beds always full.</div></div></div></div>
+      <div class="read-card" id="live-opt-card"><div class="rh"><div class="rn">2</div><div class="rm"><div class="r-title">ED Optimizer + Nursing Dir.</div><div class="r-sub">Dr. J. Chen · 10 min</div></div><div class="s-dot done" id="live-dot-opt"></div></div>
+        <div class="rb" id="live-opt-body">
+          <div><div class="rfl">Walk Rounds</div><div class="rfv" id="lv-opt-rounds">Walk rounds complete. Bed 12 needs MICU eval — Airborne precautions. Should #12 be upgraded?</div></div>
+          <div><div class="rfl">DESA Escalations</div><div class="rfv" id="lv-opt-desa">Bed 9 → 7W ✓ &nbsp;·&nbsp; Bed 10 → GOU/5SEMS ✓ &nbsp;·&nbsp; Transport pending both.</div></div>
+          <div><div class="rfl">Top 3 Prioritizations</div><ul class="rlist" id="lv-opt-pri"><li>H11A — 20+ admissions, expedition to recuperative referral</li><li>H12B — Refused SM/WV transfers, need alt plan</li><li>Bed 12 MICU eval — Airborne, review chart</li></ul></div>
+          <div><div class="rfl">Recurring Barriers</div><ul class="rlist" id="lv-opt-bar"><li>Close loop on morning escalations</li><li>SM/WV transfer refusals ongoing</li><li>Bed 38 solid onc — transfer to SM pending</li></ul></div>
+        </div>
+      </div>
+      <div class="read-card awaiting" id="live-hsp-card"><div class="rh"><div class="rn">4</div><div class="rm"><div class="r-title">Medicine Triage + ECU Lead</div><div class="r-sub">8 min</div></div><span class="aw-tag">Awaiting…</span></div></div>
+      <div class="read-card awaiting" id="live-crd-card"><div class="rh"><div class="rn">5</div><div class="rm"><div class="r-title">Care Coordination</div><div class="r-sub">1 min</div></div><span class="aw-tag">Awaiting…</span></div></div>
+      <div class="read-card awaiting" id="live-bed-card"><div class="rh"><div class="rn">6</div><div class="rm"><div class="r-title">Bed Placement</div><div class="r-sub">1 min</div></div><span class="aw-tag">Awaiting…</span></div></div>
+      <div class="read-card awaiting" id="live-nur-card"><div class="rh"><div class="rn">7</div><div class="rm"><div class="r-title">IP RN Leadership</div><div class="r-sub">1 min</div></div><span class="aw-tag">Awaiting…</span></div></div>
+
+      <!-- Scribe global notes (visible to all in live view) -->
+      <div id="live-scribe-block" style="display:none">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--purple);margin:14px 0 6px;display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:var(--purple);display:inline-block;animation:blink 1.5s infinite"></span>Scribe Notes</div>
+        <div style="background:var(--purple-bg);border:1.5px solid rgba(124,58,237,.3);border-radius:12px;padding:13px 14px;font-size:13px;line-height:1.6;color:var(--text)" id="live-scribe-notes-display">—</div>
+      </div>
+
+      <div class="scroll-pad"></div>
+    </div>
+
+    <!-- ── ACTIONS PAGE ── -->
+    <div id="actions" class="page">
+      <div class="ah"><h2>Actions</h2><button class="add-btn" onclick="openAddAction()">+ Add</button></div>
+      <div class="ag-lbl">Today · June 24</div>
+      <div id="action-list">
+        <div class="action-item"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">Transport beds 9 &amp; 10 — verify movement by 3pm</div><div class="ac-foot"><span class="ot">Bed Placement</span><span class="dt">Due today</span></div></div></div>
+        <div class="action-item"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">MICU eval for bed 12 — Airborne precautions, review chart</div><div class="ac-foot"><span class="ot">Hospitalist</span><span class="dt">Urgent</span></div></div></div>
+        <div class="action-item"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">H11A recuperative referral — expedite (20+ admissions)</div><div class="ac-foot"><span class="ot">Care Coord</span><span class="dt">Due today</span></div></div></div>
+        <div class="action-item"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">Bed 38 solid onc — confirm SM transfer plan</div><div class="ac-foot"><span class="ot">Optimizer</span><span class="dt">Due today</span></div></div></div>
+      </div>
+      <div style="margin-top:20px">
+        <div class="ag-lbl">Carried over · June 22</div>
+        <div class="action-item" style="opacity:.55"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">SM/WV transfer refusal policy — escalate to CMO</div><div class="ac-foot"><span class="ot">CMO</span><span class="dt">6/22</span></div></div></div>
+        <div class="action-item" style="opacity:.55"><button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">Fast Track hallway boarding plan — coordinate with nursing</div><div class="ac-foot"><span class="ot">Nursing Dir.</span><span class="dt">6/22</span></div></div></div>
+      </div>
+      <div class="scroll-pad"></div>
+    </div>
+  </div>
+
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-report" onclick="showPage('report',this)"><span class="ni">📋</span>My Report</button>
+    <button class="nav-btn" id="nav-live" onclick="showPage('live',this)"><span class="ni">📡</span>Live View</button>
+    <button class="nav-btn" id="nav-actions" onclick="showPage('actions',this)"><span class="ni">✅</span>Actions</button>
+  </div>
+</div>
+
+<!-- ══ BIG SCREEN ══ -->
+<div id="bigscreen" class="screen">
+  <div class="bs-header">
+    <div>
+      <div class="bs-logo">ValU · UCLA Health</div>
+      <div class="bs-title">ED Throughput Huddle</div>
+    </div>
+    <div style="text-align:center">
+      <div class="bs-meta" id="bs-date">Tuesday, June 24 · 2:00 PM</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px">
+        <div class="bs-live-dot"></div>
+        <div class="bs-section-name" id="bs-section-name">Pre-Huddle</div>
+      </div>
+    </div>
+    <div class="bs-timer-block">
+      <div class="bs-clock" id="bs-clock">0:00</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button onclick="showScreen('login')" style="padding:6px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.6);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">← Back</button>
+        <button onclick="toggleBsPause()" id="bs-pause-btn" style="padding:6px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.6);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">⏸ Pause</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="bs-scroll">
+    <div class="bs-progress-bar"><div class="bs-progress-fill" id="bs-progress-fill" style="width:0%"></div></div>
+    <div class="bs-stats-row">
+      <div class="bs-stat"><div class="bs-sv red" id="bs-stat-t">38</div><div class="bs-sl">Total Census</div></div>
+      <div class="bs-stat"><div class="bs-sv amb" id="bs-stat-b">12</div><div class="bs-sl">Boarding</div></div>
+      <div class="bs-stat"><div class="bs-sv grn" id="bs-stat-o">2</div><div class="bs-sl">Open Beds</div></div>
+      <div class="bs-stat"><div class="bs-sv red" id="bs-stat-a">6</div><div class="bs-sl">High Acuity</div></div>
+    </div>
+    <div class="bs-grid" id="bs-grid"></div>
+
+    <!-- Scribe notes on big screen -->
+    <div id="bs-scribe-block" style="display:none;max-width:1400px;margin:16px auto 0">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#C4B5FD;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:#C4B5FD;display:inline-block;animation:blink 1.5s infinite"></span>Scribe Notes</div>
+      <div style="background:rgba(124,58,237,.12);border:1.5px solid rgba(124,58,237,.3);border-radius:12px;padding:16px;font-size:14px;line-height:1.7;color:rgba(255,255,255,.85)" id="bs-scribe-notes-display">—</div>
+    </div>
+  </div>
+
+  <div class="bs-footer">
+    <span class="bs-footer-note">⚠ Big Screen shares state with the mobile session on this device. Open on the same browser for live sync.</span>
+    <button class="bs-open-btn" onclick="showScreen('app')">← Back to App</button>
+  </div>
+</div>
+
+<!-- Bed Sheet Overlay -->
+<div class="overlay" id="overlay" onclick="closeSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 id="sheet-title">Bed 9</h3>
+    <p>Tap a status, add a note if needed.</p>
+    <div class="so-grid">
+      <button class="so" onclick="pickStatus('occupied')"><div class="oi">🔴</div><span class="ol">Occupied</span><span class="os">Patient in bed</span></button>
+      <button class="so" onclick="pickStatus('open-bed')"><div class="oi">🟢</div><span class="ol">Open</span><span class="os">Ready for patient</span></button>
+      <button class="so" onclick="pickStatus('boarding')"><div class="oi">🟡</div><span class="ol">Boarding</span><span class="os">Inpatient in ED bed</span></button>
+      <button class="so" onclick="pickStatus('cleaning')"><div class="oi">⚪</div><span class="ol">Cleaning</span><span class="os">EVS in progress</span></button>
+    </div>
+    <textarea class="notes-f" id="bed-note" placeholder="Note — patient name, plan, ETA…"></textarea>
+    <button class="sheet-save" onclick="saveBed()">Update Bed</button>
+  </div>
+</div>
+
+<!-- Add Action Sheet Overlay -->
+<div class="overlay" id="action-overlay" onclick="closeActionSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>Add Action Item</h3>
+    <p>Capture a task from this huddle.</p>
+    <div class="action-sheet-fields">
+      <div><label class="fl">Action</label><input class="fi" type="text" id="new-action-text" placeholder="What needs to happen?"/></div>
+      <div><label class="fl">Owner / Role</label>
+        <div class="sw"><select class="fs" id="new-action-owner">
+          <option>Bed Placement</option><option>Hospitalist</option><option>Care Coord</option><option>Optimizer</option><option>CMO</option><option>Nursing Dir.</option><option>ED Charge</option><option>ECU Charge</option><option>ValU</option>
+        </select></div>
+      </div>
+      <div><label class="fl">Due</label>
+        <div class="sw"><select class="fs" id="new-action-due">
+          <option>Due today</option><option>Urgent</option><option>By end of week</option><option>Carry forward</option>
+        </select></div>
+      </div>
+    </div>
+    <button class="sheet-save" onclick="saveAction()" style="margin-top:16px">Add Action</button>
+  </div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════
+   SHARED STATE — single source of truth
+══════════════════════════════════════════ */
+const state = {
+  role: 'opt',
+  isScribe: false,
+  sections: {
+    chr: { saved: false, data: {} },
+    ecu: { saved: false, data: {} },
+    opt: { saved: true,  data: {
+      rounds: 'Walk rounds complete. Bed 12 needs MICU eval — Airborne precautions. Should #12 be upgraded?',
+      desa:   'Bed 9 (urology/Foley) → 7W ✓\nBed 10 (pre-liver tx/Foley) → GOU/5SEMS ✓\nTransport pending both.',
+      p1: 'H11A — 20+ admissions, expedition to recuperative referral',
+      p2: 'H12B — Refused SM/WV transfers, need alt plan',
+      p3: 'Bed 12 MICU eval — Airborne, review chart',
+      b1: 'Close loop on morning escalations',
+      b2: 'SM/WV transfer refusals ongoing',
+      b3: 'Bed 38 solid onc — transfer to SM pending'
+    }},
+    hsp: { saved: false, data: {} },
+    crd: { saved: false, data: {} },
+    bed: { saved: false, data: {} },
+    nur: { saved: false, data: {} }
+  },
+  census: { total: 38, boarding: 12, open: 2, acuity: 6 },
+  scribeNotes: '',
+  currentSectionIndex: -1,
+  timerPaused: false
+};
+
+const SECTIONS = ['chr','ecu','opt','hsp','crd','bed','nur'];
+const SECTION_NAMES = {
+  chr:'ED Census Entry', ecu:'ECU Boarder Census', opt:'ED Optimizer',
+  hsp:'Medicine Triage', crd:'Care Coordination', bed:'Bed Placement', nur:'IP RN Leadership'
+};
+
+/* ══ BED STATE ══ */
+const bedState = {
+  9:{s:'occupied',n:'Urology · Foley · → 7W ✓'},
+  10:{s:'occupied',n:'Pre-liver tx · Foley · → GOU ✓'},
+  11:{s:'boarding',n:'Trach · cerebral palsy · high complexity'},
+  12:{s:'boarding',n:'Svc capped · ophtho · MICU eval needed'},
+  22:{s:'occupied',n:''},23:{s:'open-bed',n:''},24:{s:'occupied',n:''},
+  25:{s:'cleaning',n:''},26:{s:'occupied',n:''},27:{s:'open-bed',n:''}
+};
+const slbl={occupied:'OCC','open-bed':'OPEN',boarding:'BRDG',cleaning:'CLN'};
+let activeBed=null, pendingStatus=null;
+
+/* ══ TIMER STATE ══ */
+let timerStart = Date.now();
+let timerOffset = 0; // ms paused accumulation
+let timerPaused = false;
+let timerInterval = null;
+let lapTimes = {}; // sectionKey -> ms elapsed when that section started
+
+function getElapsed() {
+  if (timerPaused) return timerOffset;
+  return timerOffset + (Date.now() - timerStart);
+}
+
+function formatTime(ms) {
+  const s = Math.floor(ms / 1000);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  return `${m}:${String(sec).padStart(2,'0')}`;
+}
+
+function startTimer() {
+  timerStart = Date.now();
+  timerOffset = 0;
+  timerPaused = false;
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(tickTimer, 500);
+}
+
+function togglePause() {
+  if (timerPaused) {
+    timerStart = Date.now();
+    timerPaused = false;
+    document.getElementById('btn-pause').textContent = '⏸';
+    document.getElementById('bs-pause-btn').textContent = '⏸ Pause';
+  } else {
+    timerOffset += Date.now() - timerStart;
+    timerPaused = true;
+    document.getElementById('btn-pause').textContent = '▶';
+    document.getElementById('bs-pause-btn').textContent = '▶ Resume';
+  }
+}
+function toggleBsPause() { togglePause(); }
+
+function tickTimer() {
+  const elapsed = getElapsed();
+  const display = formatTime(elapsed);
+  const lapEl = document.getElementById('lap-clock');
+  const bsEl = document.getElementById('bs-clock');
+  const curSec = SECTIONS[state.currentSectionIndex];
+  const allotted = curSec ? parseInt(document.querySelector(`#sec-${curSec}`)?.getAttribute('data-allotted') || 0) * 60000 : 0;
+  const lapElapsed = curSec && lapTimes[curSec] !== undefined ? elapsed - lapTimes[curSec] : elapsed;
+  const lapDisplay = formatTime(lapElapsed);
+
+  if (lapEl) {
+    lapEl.textContent = lapDisplay;
+    lapEl.className = 'lap-clock' + (allotted && lapElapsed > allotted * 1.5 ? ' over' : allotted && lapElapsed > allotted ? ' warn' : '');
+  }
+  if (bsEl) {
+    bsEl.textContent = lapDisplay;
+    bsEl.className = 'bs-clock' + (allotted && lapElapsed > allotted * 1.5 ? ' over' : allotted && lapElapsed > allotted ? ' warn' : '');
+  }
+
+  // Update section lap displays
+  SECTIONS.forEach(key => {
+    const el = document.getElementById(`laptime-sec-${key}`);
+    if (el && lapTimes[key] !== undefined) {
+      const secLap = lapTimes[key + '_end'] !== undefined
+        ? lapTimes[key + '_end'] - lapTimes[key]
+        : (key === SECTIONS[state.currentSectionIndex] ? lapElapsed : (lapTimes[SECTIONS[SECTIONS.indexOf(key)+1]] ? lapTimes[SECTIONS[SECTIONS.indexOf(key)+1]] - lapTimes[key] : lapElapsed));
+      el.textContent = formatTime(secLap);
+    }
+  });
+}
+
+function nextSection() {
+  const cur = state.currentSectionIndex;
+  const curKey = SECTIONS[cur];
+  if (curKey) lapTimes[curKey + '_end'] = getElapsed();
+
+  state.currentSectionIndex = Math.min(cur + 1, SECTIONS.length - 1);
+  const newKey = SECTIONS[state.currentSectionIndex];
+  lapTimes[newKey] = getElapsed();
+
+  updateSectionHighlight();
+  updateTimerBar();
+  renderBigScreen();
+}
+
+function updateTimerBar() {
+  const key = SECTIONS[state.currentSectionIndex];
+  const name = key ? SECTION_NAMES[key] : 'Pre-Huddle';
+  const el = document.getElementById('mt-section-name');
+  const bsEl = document.getElementById('bs-section-name');
+  if (el) el.textContent = name;
+  if (bsEl) bsEl.textContent = name;
+}
+
+function updateSectionHighlight() {
+  document.querySelectorAll('.section-card').forEach(c => c.classList.remove('active-section'));
+  document.querySelectorAll('.read-card').forEach(c => c.classList.remove('current-live'));
+  const key = SECTIONS[state.currentSectionIndex];
+  if (key) {
+    const sc = document.getElementById(`sec-${key}`);
+    if (sc) sc.classList.add('active-section');
+    const lc = document.getElementById(`live-${key}-card`);
+    if (lc) lc.classList.add('current-live');
+  }
+  renderBigScreen();
+}
+
+/* ══ SIGN IN ══ */
+const roleMap = {
+  opt:{label:'Optimizer',cls:'rp-opt'},
+  chr:{label:'ED Charge',cls:'rp-chr'},
+  ecu:{label:'ECU Charge',cls:'rp-ecu'},
+  cmo:{label:'CMO',cls:'rp-cmo'},
+  hsp:{label:'Hospitalist',cls:'rp-hsp'},
+  nur:{label:'Nursing Dir',cls:'rp-nur'},
+  crd:{label:'Care Coord',cls:'rp-crd'},
+  bed:{label:'Bed Place.',cls:'rp-bed'},
+  scr:{label:'Scribe',cls:'rp-scr'},
+  vlu:{label:'ValU',cls:'rp-vlu'}
+};
+
+// Role → which my-sections to show
+const roleShowSections = {
+  opt: ['sec-opt'],
+  chr: ['sec-chr'],
+  ecu: ['sec-ecu'],
+  cmo: ['sec-opt'],
+  hsp: ['sec-hsp'],
+  nur: ['sec-opt','sec-nur'],
+  crd: ['sec-crd'],
+  bed: ['sec-bed'],
+  scr: ['sec-chr','sec-ecu','sec-opt','sec-hsp','sec-crd','sec-bed','sec-nur'],
+  vlu: ['sec-opt']
+};
+
+function signIn() {
+  const key = document.getElementById('role-select').value;
+  state.role = key;
+  state.isScribe = (key === 'scr');
+
+  showScreen('app');
+
+  const role = roleMap[key] || roleMap['opt'];
+  const pill = document.getElementById('role-pill');
+  pill.textContent = role.label;
+  pill.className = 'role-pill ' + role.cls;
+
+  // Show/hide role-sections
+  document.querySelectorAll('.role-section').forEach(el => {
+    el.style.display = 'none';
+  });
+  const show = roleShowSections[key] || [];
+  show.forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'block';
+  });
+
+  // Hide "other team" stubs for sections the user owns
+  document.querySelectorAll('.other-team-card').forEach(el => {
+    const sec = el.getAttribute('data-sec');
+    const owned = show.includes('sec-' + sec);
+    el.style.display = owned ? 'none' : 'block';
+  });
+
+  // Scribe-specific UI
+  document.getElementById('scribe-notes-card').style.display = state.isScribe ? 'block' : 'none';
+  document.getElementById('scribe-banner').classList.toggle('active', state.isScribe);
+  document.querySelectorAll('.btn-next-sec').forEach(b => b.classList.toggle('scribe-only', state.isScribe));
+  document.querySelectorAll('.btn-pause').forEach(b => b.classList.toggle('scribe-only', state.isScribe));
+
+  if (key === 'nur') {
+    document.getElementById('opt-num').textContent = '2/7';
+    document.getElementById('opt-sub').textContent = 'Viewing as Nursing Dir · 10 min';
+  }
+
+  renderBeds('beds-9-12',[9,10,11,12]);
+  renderBeds('beds-22-27',[22,23,24,25,26,27]);
+  startTimer();
+  updateTimerBar();
+}
+
+function openBigScreen() {
+  showScreen('bigscreen');
+  startTimer();
+  renderBigScreen();
+  setInterval(renderBigScreen, 2000);
+}
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+/* ══ BED RENDERING ══ */
+function renderBeds(id, nums) {
+  const el = document.getElementById(id);
+  el.innerHTML = '';
+  nums.forEach(n => {
+    const s = bedState[n] || {s:'open-bed',n:''};
+    const b = document.createElement('button');
+    b.className = `bed-btn ${s.s}`;
+    b.innerHTML = `<span class="bn">${n}</span><span class="bs">${slbl[s.s]}</span>`;
+    b.onclick = () => openSheet(n);
+    el.appendChild(b);
+  });
+}
+
+const statusCls = {occupied:'sel-occupied','open-bed':'sel-open',boarding:'sel-boarding',cleaning:'sel-cleaning'};
+const statusOrder = ['occupied','open-bed','boarding','cleaning'];
+
+function openSheet(num) {
+  activeBed = num;
+  pendingStatus = bedState[num].s;
+  document.getElementById('sheet-title').textContent = `Bed ${num}`;
+  document.getElementById('bed-note').value = bedState[num].n || '';
+  refreshSoGrid();
+  document.getElementById('overlay').classList.add('open');
+}
+
+function refreshSoGrid() {
+  document.querySelectorAll('.so').forEach((el, i) => {
+    el.className = 'so';
+    if (statusOrder[i] === pendingStatus) el.classList.add(statusCls[pendingStatus]);
+  });
+}
+
+function pickStatus(s) { pendingStatus = s; refreshSoGrid(); }
+
+function saveBed() {
+  if (activeBed) {
+    bedState[activeBed].s = pendingStatus;
+    bedState[activeBed].n = document.getElementById('bed-note').value;
+  }
+  closeSheet();
+  renderBeds('beds-9-12',[9,10,11,12]);
+  renderBeds('beds-22-27',[22,23,24,25,26,27]);
+  renderBigScreen();
+}
+
+function closeSheet(e) {
+  if (!e || e.target === document.getElementById('overlay'))
+    document.getElementById('overlay').classList.remove('open');
+}
+
+/* ══ TABS / PAGES ══ */
+function showPage(id, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['report','live','actions'][i] === id));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function toggleSec(head) {
+  const body = head.nextElementSibling;
+  const chev = head.querySelector('.chev');
+  const open = body.classList.toggle('open');
+  chev.classList.toggle('open', open);
+}
+
+/* ══ SAVE / SYNC ══ */
+function syncCensus() {
+  const t = document.getElementById('f-total')?.value;
+  const b = document.getElementById('f-board')?.value;
+  const o = document.getElementById('f-open')?.value;
+  const a = document.getElementById('f-acuity')?.value;
+  if (t !== undefined) {
+    state.census.total = t;
+    state.census.boarding = b;
+    state.census.open = o;
+    state.census.acuity = a;
+    document.getElementById('stat-t').textContent = t || '—';
+    document.getElementById('stat-b').textContent = b || '—';
+    document.getElementById('stat-o').textContent = o || '—';
+    document.getElementById('stat-a').textContent = a || '—';
+    document.getElementById('live-stat-t').textContent = t || '—';
+    document.getElementById('live-stat-b').textContent = b || '—';
+    document.getElementById('live-stat-o').textContent = o || '—';
+    document.getElementById('live-stat-a').textContent = a || '—';
+    document.getElementById('bs-stat-t').textContent = t || '—';
+    document.getElementById('bs-stat-b').textContent = b || '—';
+    document.getElementById('bs-stat-o').textContent = o || '—';
+    document.getElementById('bs-stat-a').textContent = a || '—';
+  }
+}
+
+function syncSection(key) {
+  const d = state.sections[key].data;
+  if (key === 'opt') {
+    d.rounds = document.getElementById('f-opt-rounds')?.value;
+    d.desa   = document.getElementById('f-opt-desa')?.value;
+    d.p1 = document.getElementById('f-opt-p1')?.value;
+    d.p2 = document.getElementById('f-opt-p2')?.value;
+    d.p3 = document.getElementById('f-opt-p3')?.value;
+    d.b1 = document.getElementById('f-opt-b1')?.value;
+    d.b2 = document.getElementById('f-opt-b2')?.value;
+    d.b3 = document.getElementById('f-opt-b3')?.value;
+    // Mirror to live view
+    const lv = t => document.getElementById(t);
+    if(lv('lv-opt-rounds')) lv('lv-opt-rounds').textContent = d.rounds;
+    if(lv('lv-opt-desa'))   lv('lv-opt-desa').textContent   = d.desa;
+    if(lv('lv-opt-pri')) lv('lv-opt-pri').innerHTML = [d.p1,d.p2,d.p3].filter(Boolean).map(x=>`<li>${x}</li>`).join('');
+    if(lv('lv-opt-bar')) lv('lv-opt-bar').innerHTML = [d.b1,d.b2,d.b3].filter(Boolean).map(x=>`<li>${x}</li>`).join('');
+  } else if (key === 'hsp') {
+    d.in = document.getElementById('f-hsp-in')?.value;
+    d.out = document.getElementById('f-hsp-out')?.value;
+    d.pending = document.getElementById('f-hsp-pending')?.value;
+    d.p1 = document.getElementById('f-hsp-p1')?.value;
+    d.p2 = document.getElementById('f-hsp-p2')?.value;
+    d.p3 = document.getElementById('f-hsp-p3')?.value;
+    d.b1 = document.getElementById('f-hsp-b1')?.value;
+    d.b2 = document.getElementById('f-hsp-b2')?.value;
+    d.b3 = document.getElementById('f-hsp-b3')?.value;
+  } else if (key === 'crd') {
+    d.feedback  = document.getElementById('f-crd-feedback')?.value;
+    d.solutions = document.getElementById('f-crd-solutions')?.value;
+  } else if (key === 'bed') {
+    d.loop     = document.getElementById('f-bed-loop')?.value;
+    d.avail    = document.getElementById('f-bed-avail')?.value;
+    d.opening  = document.getElementById('f-bed-opening')?.value;
+    d.feedback = document.getElementById('f-bed-feedback')?.value;
+  } else if (key === 'nur') {
+    d.plan    = document.getElementById('f-nur-plan')?.value;
+    d.actions = document.getElementById('f-nur-actions')?.value;
+  } else if (key === 'chr') {
+    d.flags = document.getElementById('f-chr-flags')?.value;
+  } else if (key === 'ecu') {
+    d.boarders = document.getElementById('f-ecu-boarders')?.value;
+    d.hall     = document.getElementById('f-ecu-hall')?.value;
+    d.flags    = document.getElementById('f-ecu-flags')?.value;
+  }
+  renderBigScreen();
+}
+
+function syncScribeNotes() {
+  state.scribeNotes = document.getElementById('scribe-global-notes')?.value || '';
+  const display = state.scribeNotes || '—';
+  const liveEl = document.getElementById('live-scribe-notes-display');
+  const bsEl   = document.getElementById('bs-scribe-notes-display');
+  if (liveEl) liveEl.textContent = display;
+  if (bsEl)   bsEl.textContent   = display;
+  // Show/hide blocks
+  const liveBlock = document.getElementById('live-scribe-block');
+  const bsBlock   = document.getElementById('bs-scribe-block');
+  if (liveBlock) liveBlock.style.display = state.scribeNotes ? 'block' : 'none';
+  if (bsBlock)   bsBlock.style.display   = state.scribeNotes ? 'block' : 'none';
+}
+
+function scribeJump(secId) {
+  if (!secId) return;
+  const el = document.getElementById(secId);
+  if (!el) return;
+  const body = el.querySelector('.s-body');
+  const chev = el.querySelector('.chev');
+  if (body) { body.classList.add('open'); }
+  if (chev) { chev.classList.add('open'); }
+  el.scrollIntoView({behavior:'smooth', block:'start'});
+  document.getElementById('scribe-jump').value = '';
+}
+
+function markSaved(btn, key) {
+  btn.classList.add('saved');
+  btn.textContent = '✓ Saved';
+  if (key) {
+    state.sections[key].saved = true;
+    syncSection(key);
+    updateLiveCards(key);
+  }
+  const dot = btn.closest('.section-card')?.querySelector('.s-dot');
+  if (dot) { dot.className = 's-dot done'; }
+  updateProgressBar();
+  renderBigScreen();
+  setTimeout(() => {
+    btn.classList.remove('saved');
+    btn.textContent = 'Save My Report';
+  }, 2500);
+}
+
+function updateLiveCards(key) {
+  const d = state.sections[key].data;
+  if (key === 'hsp') {
+    const card = document.getElementById('live-hsp-card');
+    card.classList.remove('awaiting');
+    card.innerHTML = `<div class="rh"><div class="rn">4</div><div class="rm"><div class="r-title">Medicine Triage + ECU Lead</div><div class="r-sub">8 min</div></div><div class="s-dot done"></div></div>
+    <div class="rb">
+      <div><div class="rfl">Transfers In / Out</div><div class="rfv">In: ${d.in||'—'} &nbsp;·&nbsp; Out: ${d.out||'—'}</div></div>
+      <div><div class="rfl">Pending</div><div class="rfv">${d.pending||'—'}</div></div>
+      ${d.p1?`<div><div class="rfl">Prioritizations</div><ul class="rlist"><li>${d.p1}</li>${d.p2?`<li>${d.p2}</li>`:''}${d.p3?`<li>${d.p3}</li>`:''}` + `</ul></div>`:''}
+    </div>`;
+    document.getElementById('dot-hsp').className = 's-dot done';
+    document.getElementById('preview-hsp').textContent = `Submitted · Transfers In: ${d.in||'—'} Out: ${d.out||'—'}`;
+  } else if (key === 'crd') {
+    const card = document.getElementById('live-crd-card');
+    card.classList.remove('awaiting');
+    card.innerHTML = `<div class="rh"><div class="rn">5</div><div class="rm"><div class="r-title">Care Coordination</div><div class="r-sub">1 min</div></div><div class="s-dot done"></div></div>
+    <div class="rb">
+      <div><div class="rfl">Feedback</div><div class="rfv">${d.feedback||'—'}</div></div>
+      ${d.solutions?`<div><div class="rfl">Solutions</div><div class="rfv">${d.solutions}</div></div>`:''}
+    </div>`;
+    document.getElementById('dot-crd').className = 's-dot done';
+    document.getElementById('preview-crd').textContent = 'Submitted';
+  } else if (key === 'bed') {
+    const card = document.getElementById('live-bed-card');
+    card.classList.remove('awaiting');
+    card.innerHTML = `<div class="rh"><div class="rn">6</div><div class="rm"><div class="r-title">Bed Placement</div><div class="r-sub">1 min</div></div><div class="s-dot done"></div></div>
+    <div class="rb">
+      <div><div class="rfl">Beds Available</div><div class="rfv">${d.avail||'—'} &nbsp;·&nbsp; Opening: ${d.opening||'—'}</div></div>
+      ${d.feedback?`<div><div class="rfl">Feedback</div><div class="rfv">${d.feedback}</div></div>`:''}
+    </div>`;
+    document.getElementById('dot-bed').className = 's-dot done';
+    document.getElementById('preview-bed').textContent = `Submitted · Available: ${d.avail||'—'}`;
+  } else if (key === 'nur') {
+    const card = document.getElementById('live-nur-card');
+    card.classList.remove('awaiting');
+    card.innerHTML = `<div class="rh"><div class="rn">7</div><div class="rm"><div class="r-title">IP RN Leadership</div><div class="r-sub">1 min</div></div><div class="s-dot done"></div></div>
+    <div class="rb">
+      <div><div class="rfl">Boarder Plan</div><div class="rfv">${d.plan||'—'}</div></div>
+      ${d.actions?`<div><div class="rfl">Next Steps</div><div class="rfv">${d.actions}</div></div>`:''}
+    </div>`;
+  }
+}
+
+function updateProgressBar() {
+  const saved = SECTIONS.filter(k => state.sections[k].saved).length;
+  const pct = Math.round(saved / SECTIONS.length * 100);
+  const fill = document.getElementById('live-progress');
+  const txt  = document.getElementById('live-progress-text');
+  const bsFill = document.getElementById('bs-progress-fill');
+  if (fill) fill.style.width = pct + '%';
+  if (txt)  txt.textContent  = `${saved} of ${SECTIONS.length} sections complete`;
+  if (bsFill) bsFill.style.width = pct + '%';
+}
+
+/* ══ BIG SCREEN RENDER ══ */
+function renderBigScreen() {
+  const grid = document.getElementById('bs-grid');
+  if (!grid) return;
+
+  const secDefs = [
+    { key:'chr', num:'C', title:'ED Census Entry',      sub:'ED Charge Nurse' },
+    { key:'ecu', num:'E', title:'ECU Boarder Census',   sub:'ECU Charge Nurse' },
+    { key:'opt', num:'2', title:'ED Optimizer',          sub:'10 min' },
+    { key:'hsp', num:'4', title:'Medicine Triage',       sub:'8 min' },
+    { key:'crd', num:'5', title:'Care Coordination',     sub:'1 min' },
+    { key:'bed', num:'6', title:'Bed Placement',         sub:'1 min' },
+    { key:'nur', num:'7', title:'IP RN Leadership',      sub:'1 min' }
+  ];
+
+  const curIdx = state.currentSectionIndex;
+
+  grid.innerHTML = secDefs.map((sec, idx) => {
+    const s = state.sections[sec.key];
+    const d = s.data;
+    const isCurrent = idx === curIdx;
+    const dotCls = s.saved ? 'done' : 'empty';
+    let bodyHtml = '';
+
+    if (s.saved || Object.keys(d).length) {
+      if (sec.key === 'chr') {
+        bodyHtml = `<div class="bs-field-label">Flags</div><div class="bs-field-val">${d.flags||'—'}</div>`;
+      } else if (sec.key === 'ecu') {
+        bodyHtml = `<div class="bs-field-label">ECU Boarders</div><div class="bs-field-val">${d.boarders||'—'} ECU · ${d.hall||'—'} Hall</div>
+        ${d.flags?`<div class="bs-field-label" style="margin-top:6px">Flags</div><div class="bs-field-val">${d.flags}</div>`:''}`;
+      } else if (sec.key === 'opt') {
+        bodyHtml = `<div class="bs-field-label">Prioritizations</div><div class="bs-field-val">${[d.p1,d.p2,d.p3].filter(Boolean).map((x,i)=>`${i+1}. ${x}`).join('<br>')}</div>
+        <div class="bs-field-label" style="margin-top:6px">Barriers</div><div class="bs-field-val">${[d.b1,d.b2,d.b3].filter(Boolean).map((x,i)=>`${i+1}. ${x}`).join('<br>')}</div>`;
+      } else if (sec.key === 'hsp') {
+        bodyHtml = `<div class="bs-field-label">Transfers</div><div class="bs-field-val">In: ${d.in||'—'} · Out: ${d.out||'—'}</div>
+        ${d.p1?`<div class="bs-field-label" style="margin-top:6px">Prioritizations</div><div class="bs-field-val">${[d.p1,d.p2,d.p3].filter(Boolean).map((x,i)=>`${i+1}. ${x}`).join('<br>')}</div>`:''}`;
+      } else if (sec.key === 'crd') {
+        bodyHtml = `<div class="bs-field-label">Feedback</div><div class="bs-field-val">${d.feedback||'—'}</div>
+        ${d.solutions?`<div class="bs-field-label" style="margin-top:6px">Solutions</div><div class="bs-field-val">${d.solutions}</div>`:''}`;
+      } else if (sec.key === 'bed') {
+        bodyHtml = `<div class="bs-field-label">Availability</div><div class="bs-field-val">${d.avail||'—'} · Opening: ${d.opening||'—'}</div>
+        ${d.feedback?`<div class="bs-field-label" style="margin-top:6px">Notes</div><div class="bs-field-val">${d.feedback}</div>`:''}`;
+      } else if (sec.key === 'nur') {
+        bodyHtml = `<div class="bs-field-label">Boarder Plan</div><div class="bs-field-val">${d.plan||'—'}</div>
+        ${d.actions?`<div class="bs-field-label" style="margin-top:6px">Next Steps</div><div class="bs-field-val">${d.actions}</div>`:''}`;
+      }
+    }
+
+    return `<div class="bs-card${isCurrent?' active-now':''}">
+      <div class="bs-card-head">
+        <div class="bs-num${isCurrent?' active':''}">${sec.num}</div>
+        <div><div class="bs-card-title">${sec.title}</div><div class="bs-card-sub">${sec.sub}</div></div>
+        <div class="bs-status">
+          ${isCurrent?`<span style="font-size:10px;font-weight:700;color:#90CDF4;background:rgba(39,116,174,.25);padding:3px 7px;border-radius:6px">NOW</span>`:''}
+          <div class="bs-dot ${dotCls}"></div>
+        </div>
+      </div>
+      ${bodyHtml ? `<div class="bs-card-body">${bodyHtml}</div>` : `<div class="bs-awaiting">Awaiting submission…</div>`}
+    </div>`;
+  }).join('');
+}
+
+/* ══ ACTIONS ══ */
+function openAddAction() { document.getElementById('action-overlay').classList.add('open'); }
+function closeActionSheet(e) {
+  if (!e || e.target === document.getElementById('action-overlay'))
+    document.getElementById('action-overlay').classList.remove('open');
+}
+
+function saveAction() {
+  const text  = document.getElementById('new-action-text').value.trim();
+  const owner = document.getElementById('new-action-owner').value;
+  const due   = document.getElementById('new-action-due').value;
+  if (!text) return;
+  const list = document.getElementById('action-list');
+  const div  = document.createElement('div');
+  div.className = 'action-item';
+  div.innerHTML = `<button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">${text}</div><div class="ac-foot"><span class="ot">${owner}</span><span class="dt">${due}</span></div></div>`;
+  list.prepend(div);
+  document.getElementById('new-action-text').value = '';
+  closeActionSheet();
+}
+
+function toggleCheck(btn) {
+  btn.classList.toggle('checked');
+  const txt = btn.nextElementSibling?.querySelector('.ac-text');
+  if (txt) txt.classList.toggle('done', btn.classList.contains('checked'));
+}
+
+/* ══ INIT ══ */
+window.addEventListener('DOMContentLoaded', () => {
+  renderBigScreen();
+});
+</script>
+</body>
+</html>
