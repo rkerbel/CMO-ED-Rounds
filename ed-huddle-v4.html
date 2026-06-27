@@ -1,0 +1,470 @@
+    <button class="nav-btn" id="nav-live" onclick="showTab('live',this)"><span class="ni">📡</span>Live</button>
+    <button class="nav-btn" id="nav-actions" onclick="showTab('actions',this)"><span class="ni">✅</span>Actions</button>
+    <button class="nav-btn" id="nav-closeloop" onclick="showTab('closeloop',this)"><span class="ni">🔁</span>Close</button>
+  </div>
+</div>
+
+<!-- BIG SCREEN -->
+<div id="bigscreen" class="screen">
+  <div class="bs-header">
+    <div><div class="bs-logo">ValU · UCLA Health</div><div class="bs-title">ED Throughput Huddle</div></div>
+    <div style="text-align:center">
+      <div class="bs-meta">Friday, June 26 · 2:00 PM</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px">
+        <div style="width:8px;height:8px;border-radius:50%;background:#4ADE80;animation:blink 1.5s infinite"></div>
+        <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7)" id="bs-section-name">Pre-Huddle</span>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="bs-clock" id="bs-clock">0:00</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button onclick="showScreen('login')" style="padding:6px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.6);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">← Back</button>
+        <button onclick="togglePause()" id="bs-pause-btn" style="padding:6px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.6);font-size:11px;font-weight:600;font-family:Inter,sans-serif;cursor:pointer">⏸ Pause</button>
+      </div>
+    </div>
+  </div>
+  <div class="bs-scroll">
+    <div class="bs-progress-bar"><div class="bs-progress-fill" id="bs-progress-fill" style="width:0%"></div></div>
+    <div class="bs-stats-row">
+      <div class="bs-stat"><div class="bs-sv red" id="bs-stat-t">38</div><div class="bs-sl">Total Census</div></div>
+      <div class="bs-stat"><div class="bs-sv amb" id="bs-stat-b">12</div><div class="bs-sl">Boarding</div></div>
+      <div class="bs-stat"><div class="bs-sv grn" id="bs-stat-o">2</div><div class="bs-sl">Open Beds</div></div>
+      <div class="bs-stat"><div class="bs-sv red" id="bs-stat-a">6</div><div class="bs-sl">High Acuity</div></div>
+    </div>
+    <div class="bs-grid" id="bs-grid"></div>
+    <div id="bs-scribe-block" style="display:none;max-width:1400px;margin:16px auto 0">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#C4B5FD;margin-bottom:8px;display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:50%;background:#C4B5FD;display:inline-block;animation:blink 1.5s infinite"></span>Scribe Notes</div>
+      <div style="background:rgba(124,58,237,.12);border:1.5px solid rgba(124,58,237,.3);border-radius:12px;padding:16px;font-size:14px;line-height:1.7;color:rgba(255,255,255,.85)" id="bs-scribe-notes-display">—</div>
+    </div>
+  </div>
+  <div class="bs-footer">
+    <span class="bs-footer-note">⚠ Big Screen shares state with the mobile session in the same browser window.</span>
+    <button class="bs-open-btn" onclick="showScreen('app')">← Back to App</button>
+  </div>
+</div>
+
+<!-- BED SHEET -->
+<div class="overlay" id="overlay" onclick="closeSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 id="sheet-title">Bed 9</h3>
+    <p>Tap a status, add a note if needed.</p>
+    <div class="so-grid">
+      <button class="so" onclick="pickStatus('occupied')"><div class="oi">🔴</div><span class="ol">Occupied</span><span class="os">Patient in bed</span></button>
+      <button class="so" onclick="pickStatus('open-bed')"><div class="oi">🟢</div><span class="ol">Open</span><span class="os">Ready for patient</span></button>
+      <button class="so" onclick="pickStatus('boarding')"><div class="oi">🟡</div><span class="ol">Boarding</span><span class="os">Inpatient in ED bed</span></button>
+      <button class="so" onclick="pickStatus('cleaning')"><div class="oi">⚪</div><span class="ol">Cleaning</span><span class="os">EVS in progress</span></button>
+    </div>
+    <textarea class="notes-f" id="bed-note" placeholder="Note — patient name, plan, ETA…"></textarea>
+    <button class="sheet-save" onclick="saveBed()">Update Bed</button>
+  </div>
+</div>
+
+<!-- BARRIER SHEET -->
+<div class="overlay" id="barrier-overlay" onclick="closeBarrierSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>Log a Barrier</h3>
+    <p>Describe the barrier — added to the running list.</p>
+    <div class="sheet-fields">
+      <div><label class="fl">Barrier description</label><input class="fi" type="text" id="barrier-text" placeholder="What's blocking flow?"/></div>
+      <div><label class="fl">Category</label>
+        <div class="sw"><select class="fs" id="barrier-category">
+          <option>Boarding</option><option>Transfer</option><option>Imaging / IR</option><option>Staffing</option><option>Bed Availability</option><option>Equipment</option><option>Other</option>
+        </select></div>
+      </div>
+    </div>
+    <button class="sheet-save" onclick="saveBarrier()" style="margin-top:16px">Add Barrier</button>
+  </div>
+</div>
+
+<!-- ADD ACTION SHEET -->
+<div class="overlay" id="action-overlay" onclick="closeActionSheet(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>Add Action Item</h3>
+    <p>Capture a task from this huddle.</p>
+    <div class="sheet-fields">
+      <div><label class="fl">Action</label><input class="fi" type="text" id="new-action-text" placeholder="What needs to happen?"/></div>
+      <div><label class="fl">Owner / Role</label>
+        <div class="sw"><select class="fs" id="new-action-owner">
+          <option>Bed Placement</option><option>Hospitalist</option><option>Care Coord</option><option>Optimizer</option><option>CMO</option><option>Nursing Dir.</option><option>ED Charge</option><option>ECU Charge</option><option>ValU</option>
+        </select></div>
+      </div>
+      <div><label class="fl">Due</label>
+        <div class="sw"><select class="fs" id="new-action-due">
+          <option>Due today</option><option>Urgent</option><option>By end of week</option><option>Carry forward</option>
+        </select></div>
+      </div>
+    </div>
+    <button class="sheet-save" onclick="saveAction()" style="margin-top:16px">Add Action</button>
+  </div>
+</div>
+
+<script>
+const state={
+  role:'opt',isScribe:false,currentPhase:0,currentSectionIndex:-1,
+  sections:{
+    chr:{saved:false,data:{}},ecu:{saved:false,data:{}},
+    opt:{saved:true,data:{rounds:'Walk rounds complete. Bed 12 needs MICU eval — Airborne precautions.',desa:'Bed 9 → 7W ✓ · Bed 10 → GOU/5SEMS ✓',p1:'H11A — 20+ admissions, expedition to recuperative referral',p2:'H12B — Refused SM/WV transfers, need alt plan',p3:'Bed 12 MICU eval — Airborne, review chart',b1:'Close loop on morning escalations',b2:'SM/WV transfer refusals ongoing',b3:'Bed 38 solid onc — transfer to SM pending'}},
+    hsp:{saved:false,data:{}},crd:{saved:false,data:{}},
+    bed:{saved:false,data:{}},nur:{saved:false,data:{}},
+    icu:{saved:false,data:{}},img:{saved:false,data:{}}
+  },
+  census:{total:38,boarding:12,open:2,acuity:6},
+  scribeNotes:'',
+  barriers:{wt:[],huddle:[]},
+  dispos:{9:null,10:null,11:null,12:null}
+};
+
+const SECTIONS=['chr','ecu','opt','img','icu','hsp','crd','bed','nur'];
+const SECTION_NAMES={chr:'ED Census',ecu:'ECU Unit Director',opt:'ED Optimizer',img:'Imaging & IR',icu:'ICU Status',hsp:'Medicine Triage',crd:'Case Mgmt',bed:'Patient Placement',nur:'IP RN Leadership'};
+const DISPOS=['Home','Inpatient','SM','WV','ICU','OR','Other'];
+
+const bedState={
+  9:{s:'occupied',n:'Urology · Foley · → 7W ✓'},10:{s:'occupied',n:'Pre-liver tx · Foley · → GOU ✓'},
+  11:{s:'boarding',n:'Trach · cerebral palsy · high complexity'},12:{s:'boarding',n:'Svc capped · ophtho · MICU eval needed'},
+  22:{s:'occupied',n:''},23:{s:'open-bed',n:''},24:{s:'occupied',n:''},25:{s:'cleaning',n:''},26:{s:'occupied',n:''},27:{s:'open-bed',n:''}
+};
+const slbl={occupied:'OCC','open-bed':'OPEN',boarding:'BRDG',cleaning:'CLN'};
+let activeBed=null,pendingStatus=null;
+
+// TIMER
+let timerStart=Date.now(),timerOffset=0,timerPaused=false,timerInterval=null,lapTimes={};
+function getElapsed(){return timerPaused?timerOffset:timerOffset+(Date.now()-timerStart);}
+function formatTime(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60);return `${m}:${String(s%60).padStart(2,'0')}`;}
+function startTimer(){timerStart=Date.now();timerOffset=0;timerPaused=false;if(timerInterval)clearInterval(timerInterval);timerInterval=setInterval(tickTimer,500);}
+function togglePause(){
+  if(timerPaused){timerStart=Date.now();timerPaused=false;document.getElementById('btn-pause').textContent='⏸';document.getElementById('bs-pause-btn').textContent='⏸ Pause';}
+  else{timerOffset+=Date.now()-timerStart;timerPaused=true;document.getElementById('btn-pause').textContent='▶';document.getElementById('bs-pause-btn').textContent='▶ Resume';}
+}
+function tickTimer(){
+  const elapsed=getElapsed();
+  const curKey=SECTIONS[state.currentSectionIndex];
+  const lapElapsed=curKey&&lapTimes[curKey]!==undefined?elapsed-lapTimes[curKey]:elapsed;
+  const allotted=curKey?parseInt(document.querySelector(`#sec-${curKey}`)?.getAttribute('data-allotted')||0)*60000:0;
+  const display=formatTime(lapElapsed);
+  const cls='lap-clock'+(allotted&&lapElapsed>allotted*1.5?' over':allotted&&lapElapsed>allotted?' warn':'');
+  const lc=document.getElementById('lap-clock');const bc=document.getElementById('bs-clock');
+  if(lc){lc.textContent=display;lc.className=cls;}
+  if(bc){bc.textContent=display;bc.className=cls.replace('lap-clock','bs-clock');}
+  SECTIONS.forEach(k=>{
+    const el=document.getElementById(`laptime-sec-${k}`);
+    if(el&&lapTimes[k]!==undefined){
+      const end=lapTimes[k+'_end']!==undefined?lapTimes[k+'_end']:elapsed;
+      el.textContent=formatTime(end-lapTimes[k]);
+    }
+  });
+}
+function nextSection(){
+  const cur=state.currentSectionIndex;
+  const curKey=SECTIONS[cur];
+  if(curKey)lapTimes[curKey+'_end']=getElapsed();
+  state.currentSectionIndex=Math.min(cur+1,SECTIONS.length-1);
+  const newKey=SECTIONS[state.currentSectionIndex];
+  lapTimes[newKey]=getElapsed();
+  const name=SECTION_NAMES[newKey]||'';
+  const el=document.getElementById('mt-section-name');const bsEl=document.getElementById('bs-section-name');
+  if(el)el.textContent=name;if(bsEl)bsEl.textContent=name;
+  document.querySelectorAll('.section-card').forEach(c=>c.classList.remove('active-section'));
+  document.querySelectorAll('.read-card').forEach(c=>c.classList.remove('current-live'));
+  document.getElementById(`sec-${newKey}`)?.classList.add('active-section');
+  document.getElementById(`live-${newKey}-card`)?.classList.add('current-live');
+  renderBigScreen();
+}
+
+// ROLES
+const roleMap={opt:{label:'Optimizer',cls:'rp-opt'},chr:{label:'ED Charge',cls:'rp-chr'},ecu:{label:'ECU Charge',cls:'rp-ecu'},cmo:{label:'CMO',cls:'rp-cmo'},hsp:{label:'Hospitalist',cls:'rp-hsp'},nur:{label:'Nursing Dir',cls:'rp-nur'},crd:{label:'Care Coord',cls:'rp-crd'},bed:{label:'Bed Place.',cls:'rp-bed'},scr:{label:'Scribe',cls:'rp-scr'},vlu:{label:'ValU',cls:'rp-vlu'}};
+const roleShowSections={opt:['sec-opt'],chr:['sec-chr'],ecu:['sec-ecu'],cmo:['sec-opt'],hsp:['sec-hsp'],nur:['sec-opt','sec-nur'],crd:['sec-crd'],bed:['sec-bed'],scr:['sec-chr','sec-ecu','sec-opt','sec-hsp','sec-crd','sec-bed','sec-nur'],vlu:['sec-opt']};
+
+function signIn(){
+  const key=document.getElementById('role-select').value;
+  state.role=key;state.isScribe=(key==='scr');
+  showScreen('app');
+  const role=roleMap[key]||roleMap['opt'];
+  const pill=document.getElementById('role-pill');
+  pill.textContent=role.label;pill.className='role-pill '+role.cls;
+  document.querySelectorAll('.role-section').forEach(el=>el.style.display='none');
+  (roleShowSections[key]||[]).forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='block';});
+  document.getElementById('scribe-notes-card').style.display=state.isScribe?'block':'none';
+  document.getElementById('scribe-banner').classList.toggle('active',state.isScribe);
+  document.querySelectorAll('.btn-next-sec').forEach(b=>b.classList.toggle('scribe-only',state.isScribe));
+  document.querySelectorAll('.btn-pause').forEach(b=>b.classList.toggle('scribe-only',state.isScribe));
+  renderBeds('beds-9-12',[9,10,11,12]);
+  renderBeds('beds-22-27',[22,23,24,25,26,27]);
+  renderDispoGrid();
+  startTimer();
+}
+function openBigScreen(){showScreen('bigscreen');startTimer();renderBigScreen();setInterval(renderBigScreen,2000);}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// PHASE NAV
+function goPhase(n){
+  state.currentPhase=n;
+  document.querySelectorAll('.phase-screen').forEach(p=>p.classList.remove('active'));
+  document.getElementById(`phase-${n}`)?.classList.add('active');
+  document.querySelectorAll('.ps-btn').forEach((b,i)=>{b.classList.remove('active','done');if(i===n)b.classList.add('active');else if(i<n)b.classList.add('done');});
+  const names=['Pre-Huddle','Walk-Through','Huddle','Close Loop'];
+  const el=document.getElementById('mt-section-name');
+  if(el&&state.currentSectionIndex===-1)el.textContent=names[n];
+}
+
+// BEDS
+function renderBeds(id,nums){
+  const el=document.getElementById(id);if(!el)return;el.innerHTML='';
+  nums.forEach(n=>{
+    const s=bedState[n]||{s:'open-bed',n:''};
+    const b=document.createElement('button');
+    b.className=`bed-btn ${s.s}`;
+    b.innerHTML=`<span class="bn">${n}</span><span class="bs">${slbl[s.s]}</span>`;
+    b.onclick=()=>openSheet(n);el.appendChild(b);
+  });
+}
+const statusCls={occupied:'sel-occupied','open-bed':'sel-open',boarding:'sel-boarding',cleaning:'sel-cleaning'};
+const statusOrder=['occupied','open-bed','boarding','cleaning'];
+function openSheet(num){activeBed=num;pendingStatus=bedState[num].s;document.getElementById('sheet-title').textContent=`Bed ${num}`;document.getElementById('bed-note').value=bedState[num].n||'';refreshSoGrid();document.getElementById('overlay').classList.add('open');}
+function refreshSoGrid(){document.querySelectorAll('.so').forEach((el,i)=>{el.className='so';if(statusOrder[i]===pendingStatus)el.classList.add(statusCls[pendingStatus]);});}
+function pickStatus(s){pendingStatus=s;refreshSoGrid();}
+function saveBed(){if(activeBed){bedState[activeBed].s=pendingStatus;bedState[activeBed].n=document.getElementById('bed-note').value;}closeSheet();renderBeds('beds-9-12',[9,10,11,12]);renderBeds('beds-22-27',[22,23,24,25,26,27]);renderDispoGrid();renderBigScreen();}
+function closeSheet(e){if(!e||e.target===document.getElementById('overlay'))document.getElementById('overlay').classList.remove('open');}
+
+// DISPO
+function renderDispoGrid(){
+  const grid=document.getElementById('dispo-grid-9-12');if(!grid)return;
+  grid.innerHTML=[9,10,11,12].map(n=>{
+    const s=bedState[n]||{s:'occupied'};
+    const cur=state.dispos[n];
+    const btns=DISPOS.map(d=>`<button class="dispo-btn${cur===d?' selected':''}" onclick="setDispo(${n},'${d}')">${d}</button>`).join('');
+    return `<div class="dispo-bed-row"><div class="dispo-bed-label">Bed ${n} <span class="dispo-bed-status ${s.s}">${slbl[s.s]}</span></div><div class="dispo-btns">${btns}</div><input class="dispo-timeframe" type="text" placeholder="Timeframe (e.g. by 3pm, pending transport…)" id="dispo-time-${n}"/></div>`;
+  }).join('');
+}
+function setDispo(bed,dispo){
+  state.dispos[bed]=dispo;
+  document.querySelectorAll('#dispo-grid-9-12 .dispo-bed-row').forEach((row,i)=>{
+    if([9,10,11,12][i]===bed)row.querySelectorAll('.dispo-btn').forEach(b=>b.classList.toggle('selected',b.textContent===dispo));
+  });
+}
+
+// BARRIERS
+let activeBarrierContext='wt';
+function openBarrierSheet(ctx='wt'){activeBarrierContext=ctx;document.getElementById('barrier-text').value='';document.getElementById('barrier-overlay').classList.add('open');}
+function closeBarrierSheet(e){if(!e||e.target===document.getElementById('barrier-overlay'))document.getElementById('barrier-overlay').classList.remove('open');}
+function saveBarrier(){
+  const text=document.getElementById('barrier-text').value.trim();
+  const cat=document.getElementById('barrier-category').value;
+  if(!text)return;
+  const time=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  state.barriers[activeBarrierContext].push({text,cat,time});
+  renderBarriers(activeBarrierContext);updateAllBarriersDisplay();closeBarrierSheet();
+}
+function renderBarriers(ctx){
+  const list=document.getElementById(`barrier-list-${ctx}`);
+  const count=document.getElementById(`barrier-count-${ctx}`);
+  if(!list)return;
+  list.innerHTML=state.barriers[ctx].map((b,i)=>`<div class="barrier-item"><div class="barrier-item-text">${b.cat}: ${b.text}</div><span class="barrier-item-time">${b.time}</span><button class="barrier-item-del" onclick="removeBarrier('${ctx}',${i})">×</button></div>`).join('');
+  if(count)count.textContent=`${state.barriers[ctx].length} logged`;
+}
+function removeBarrier(ctx,i){state.barriers[ctx].splice(i,1);renderBarriers(ctx);updateAllBarriersDisplay();}
+function updateAllBarriersDisplay(){
+  const el=document.getElementById('all-barriers-display');if(!el)return;
+  const all=[...state.barriers.wt.map(b=>({...b,phase:'Walk-Through'})),...state.barriers.huddle.map(b=>({...b,phase:'Huddle'}))];
+  if(!all.length){el.innerHTML='<span style="color:var(--muted)">No barriers logged yet.</span>';return;}
+  el.innerHTML=all.map(b=>`<div class="barrier-item" style="margin-bottom:6px"><div class="barrier-item-text">[${b.phase}] ${b.cat}: ${b.text}</div><span class="barrier-item-time">${b.time}</span></div>`).join('');
+}
+
+// IMAGING
+function toggleImgDetail(type){
+  const checked=document.getElementById(`img-${type}`).checked;
+  document.getElementById(`img-detail-${type}`)?.classList.toggle('show',checked);
+  const hasData=['ct','mri','ir'].some(t=>document.getElementById(`img-${t}`)?.checked);
+  const dot=document.getElementById('dot-img');if(dot)dot.className='s-dot '+(hasData?'draft':'empty');
+}
+function markImgSaved(){
+  state.sections.img.saved=true;
+  const dot=document.getElementById('dot-img');if(dot)dot.className='s-dot done';
+  updateLiveCard('img');updateProgressBar();renderBigScreen();
+}
+
+// SYNC
+function syncCensus(){
+  const vals={t:document.getElementById('f-total')?.value||'—',b:document.getElementById('f-board')?.value||'—',o:document.getElementById('f-open')?.value||'—',a:document.getElementById('f-acuity')?.value||'—'};
+  updateCensusDisplays(vals);
+}
+function syncCensus2(){
+  const vals={t:document.getElementById('f2-total')?.value||'—',b:document.getElementById('f2-board')?.value||'—',o:document.getElementById('f2-open')?.value||'—',a:document.getElementById('f2-acuity')?.value||'—'};
+  updateCensusDisplays(vals);
+}
+function updateCensusDisplays(v){
+  ['stat-t','live-stat-t','bs-stat-t'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=v.t;});
+  ['stat-b','live-stat-b','bs-stat-b'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=v.b;});
+  ['stat-o','live-stat-o','bs-stat-o'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=v.o;});
+  ['stat-a','live-stat-a','bs-stat-a'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=v.a;});
+  state.census={total:v.t,boarding:v.b,open:v.o,acuity:v.a};
+}
+function syncSection(key){
+  const d=state.sections[key]?.data;if(!d)return;
+  const g=id=>document.getElementById(id)?.value||'';
+  if(key==='opt'){d.rounds=g('f-opt-rounds');d.desa=g('f-opt-desa');d.p1=g('f-opt-p1');d.p2=g('f-opt-p2');d.p3=g('f-opt-p3');d.b1=g('f-opt-b1');d.b2=g('f-opt-b2');d.b3=g('f-opt-b3');}
+  else if(key==='hsp'){d.in=g('f-hsp-in');d.out=g('f-hsp-out');d.smwv=g('f-hsp-smwv');d.pending=g('f-hsp-pending');d.p1=g('f-hsp-p1');d.p2=g('f-hsp-p2');d.p3=g('f-hsp-p3');}
+  else if(key==='crd'){d.feedback=g('f-crd-feedback');}
+  else if(key==='bed'){d.priorities=g('f-bed-priorities');d.likelihood=g('f-bed-likelihood');d.avail=g('f-bed-avail');d.opening=g('f-bed-opening');d.shared=g('f-bed-shared');d.icu=g('f-bed-icu');}
+  else if(key==='nur'){d.plan=g('f-nur-plan');d.actions=g('f-nur-actions');}
+  else if(key==='chr'){d.flags=g('f-chr-flags');}
+  else if(key==='ecu'){d.boarders=g('f-ecu-boarders');d.hall=g('f-ecu-hall');d.los=g('f-ecu-los');d.flags=g('f-ecu-flags');}
+  else if(key==='icu'){d.updown=g('f-icu-updown');d.micu=g('f-icu-micu');}
+  renderBigScreen();
+}
+function syncScribeNotes(){
+  state.scribeNotes=document.getElementById('scribe-global-notes')?.value||'';
+  const display=state.scribeNotes||'—';
+  ['live-scribe-notes-display','bs-scribe-notes-display'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=display;});
+  document.getElementById('live-scribe-block').style.display=state.scribeNotes?'block':'none';
+  document.getElementById('bs-scribe-block').style.display=state.scribeNotes?'block':'none';
+}
+function scribeJump(secId){
+  if(!secId)return;
+  const el=document.getElementById(secId);if(!el)return;
+  el.querySelector('.s-body')?.classList.add('open');
+  el.querySelector('.chev')?.classList.add('open');
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+// SAVE
+function markSaved(btn,key){
+  btn.classList.add('saved');btn.textContent='✓ Saved';
+  if(key&&state.sections[key]){state.sections[key].saved=true;syncSection(key);updateLiveCard(key);}
+  const dot=btn.closest('.section-card')?.querySelector('.s-dot');if(dot)dot.className='s-dot done';
+  updateProgressBar();renderBigScreen();
+  setTimeout(()=>{btn.classList.remove('saved');btn.textContent='Save My Report';},2500);
+}
+function updateLiveCard(key){
+  const d=state.sections[key]?.data||{};
+  const make=(rn,title,sub,body)=>`<div class="rh"><div class="rn">${rn}</div><div class="rm"><div class="r-title">${title}</div><div class="r-sub">${sub}</div></div><div class="s-dot done"></div></div><div class="rb">${body}</div>`;
+  const fld=(label,val)=>val?`<div><div class="rfl">${label}</div><div class="rfv">${val}</div></div>`:'';
+  const c=key=>document.getElementById(`live-${key}-card`);
+  if(key==='opt'&&c('opt')){c('opt').classList.remove('awaiting');c('opt').innerHTML=make('2','ED Optimizer','10 min',fld('Walk Rounds',d.rounds)+fld('DESA',d.desa)+`<div><div class="rfl">Prioritizations</div><ul class="rlist">${[d.p1,d.p2,d.p3].filter(Boolean).map(x=>`<li>${x}</li>`).join('')}</ul></div>`);}
+  else if(key==='hsp'&&c('hsp')){c('hsp').classList.remove('awaiting');c('hsp').innerHTML=make('4','Medicine Triage','8 min',fld('Transfers',`In: ${d.in||'—'} · Out: ${d.out||'—'}`)+fld('SM/WV Priorities',d.smwv));}
+  else if(key==='crd'&&c('crd')){c('crd').classList.remove('awaiting');c('crd').innerHTML=make('5','Case Mgmt / Transfers','3 min',fld('Transfer Priority',getTransferListText()));}
+  else if(key==='bed'&&c('bed')){c('bed').classList.remove('awaiting');c('bed').innerHTML=make('6','Patient Placement','3 min',fld('Available',`${d.avail||'—'} · Opening: ${d.opening||'—'}`)+fld('Priorities',d.priorities));}
+  else if(key==='nur'&&c('nur')){c('nur').classList.remove('awaiting');c('nur').innerHTML=make('7','IP RN Leadership','2 min',fld('Boarder Plan',d.plan));}
+  else if(key==='ecu'&&c('ecu')){c('ecu').classList.remove('awaiting');c('ecu').innerHTML=make('E','ECU Unit Director','5 min',fld('Boarders',`ECU: ${d.boarders||'—'} · Hall: ${d.hall||'—'}`)+fld('Longest LOS',d.los));}
+  else if(key==='img'&&c('img')){c('img').classList.remove('awaiting');const delays=['ct','mri','ir'].filter(t=>document.getElementById(`img-${t}`)?.checked).map(t=>t.toUpperCase()).join(', ')||'No delays';c('img').innerHTML=make('📷','Imaging & IR','Quick update',fld('Delays',delays));}
+  else if(key==='icu'&&document.getElementById('live-icu-card')){const ci=document.getElementById('live-icu-card');ci.classList.remove('awaiting');ci.innerHTML=make('🏥','ICU Status','Upgrades · Queue',fld('Notes',d.updown)+fld('MICU Queue',d.micu));}
+}
+function getTransferListText(){
+  return Array.from(document.querySelectorAll('#transfer-list .transfer-item')).map((el,i)=>`${i+1}. ${el.querySelector('.transfer-text')?.textContent||''}`).join(' · ')||'—';
+}
+function updateProgressBar(){
+  const saved=Object.keys(state.sections).filter(k=>state.sections[k].saved).length;
+  const total=Object.keys(state.sections).length;
+  const pct=Math.round(saved/total*100);
+  const fill=document.getElementById('live-progress');const txt=document.getElementById('live-progress-text');const bs=document.getElementById('bs-progress-fill');
+  if(fill)fill.style.width=pct+'%';if(txt)txt.textContent=`${saved} of ${total} sections complete`;if(bs)bs.style.width=pct+'%';
+}
+
+// DRAG TO REORDER
+let dragSrc=null;
+function initDrag(){
+  const list=document.getElementById('transfer-list');if(!list)return;
+  list.addEventListener('dragstart',e=>{dragSrc=e.target.closest('.transfer-item');setTimeout(()=>dragSrc?.classList.add('dragging'),0);});
+  list.addEventListener('dragend',e=>{e.target.closest('.transfer-item')?.classList.remove('dragging');reRankTransfers();});
+  list.addEventListener('dragover',e=>{
+    e.preventDefault();
+    const target=e.target.closest('.transfer-item');
+    if(target&&target!==dragSrc){const mid=target.getBoundingClientRect().top+target.getBoundingClientRect().height/2;if(e.clientY>mid)target.after(dragSrc);else target.before(dragSrc);}
+  });
+  list.addEventListener('touchstart',e=>{dragSrc=e.target.closest('.transfer-item');},{passive:true});
+  list.addEventListener('touchmove',e=>{
+    if(!dragSrc)return;e.preventDefault();
+    const t=e.touches[0];const target=document.elementFromPoint(t.clientX,t.clientY)?.closest('.transfer-item');
+    if(target&&target!==dragSrc)target.before(dragSrc);
+  },{passive:false});
+  list.addEventListener('touchend',()=>reRankTransfers());
+}
+function reRankTransfers(){document.querySelectorAll('#transfer-list .transfer-item .transfer-rank').forEach((el,i)=>el.textContent=i+1);}
+function addTransfer(){
+  const input=document.getElementById('new-transfer-text');const text=input?.value.trim();if(!text)return;
+  const list=document.getElementById('transfer-list');
+  const div=document.createElement('div');div.className='transfer-item';div.draggable=true;
+  div.innerHTML=`<span class="drag-handle">⠿</span><div class="transfer-rank">${list.children.length+1}</div><span class="transfer-text">${text}</span><span class="transfer-dest">TBD</span>`;
+  list.appendChild(div);input.value='';
+}
+
+// VALU TABLE
+function addValuRow(){
+  const tbody=document.getElementById('valu-tbody');
+  const tr=document.createElement('tr');
+  tr.innerHTML=`<td><select><option value="immediate">Immediate</option><option value="recurring">Recurring</option></select></td><td><input type="text" placeholder="Bed #"/></td><td><input type="text" placeholder="MRN"/></td><td><textarea placeholder="Issue…" rows="2"></textarea></td><td><textarea placeholder="Next steps…" rows="2"></textarea></td><td><textarea placeholder="Notes…" rows="2"></textarea></td><td><button onclick="removeValuRow(this)" style="background:none;border:none;color:var(--light);font-size:18px;cursor:pointer;padding:4px">×</button></td>`;
+  tbody.appendChild(tr);
+}
+function removeValuRow(btn){btn.closest('tr').remove();}
+
+// TABS
+function showTab(id,el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id).classList.add('active');
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['report','live','actions','closeloop'][i]===id));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));el.classList.add('active');
+}
+function toggleSec(head){
+  const body=head.nextElementSibling;const chev=head.querySelector('.chev');
+  const open=body.classList.toggle('open');chev.classList.toggle('open',open);
+}
+
+// ACTIONS
+function openAddAction(){document.getElementById('action-overlay').classList.add('open');}
+function closeActionSheet(e){if(!e||e.target===document.getElementById('action-overlay'))document.getElementById('action-overlay').classList.remove('open');}
+function saveAction(){
+  const text=document.getElementById('new-action-text').value.trim();
+  const owner=document.getElementById('new-action-owner').value;
+  const due=document.getElementById('new-action-due').value;
+  if(!text)return;
+  const div=document.createElement('div');div.className='action-item';
+  div.innerHTML=`<button class="ac" onclick="toggleCheck(this)"></button><div class="ac-body"><div class="ac-text">${text}</div><div class="ac-foot"><span class="ot">${owner}</span><span class="dt">${due}</span></div></div>`;
+  document.getElementById('action-list').prepend(div);
+  document.getElementById('new-action-text').value='';closeActionSheet();
+}
+function toggleCheck(btn){btn.classList.toggle('checked');btn.nextElementSibling?.querySelector('.ac-text')?.classList.toggle('done',btn.classList.contains('checked'));}
+
+// COMPLETE
+function completeHuddle(){alert('Huddle complete ✓\n\nIn V5, this will save the full session to a searchable database via Supabase.');}
+
+// BIG SCREEN
+function renderBigScreen(){
+  const grid=document.getElementById('bs-grid');if(!grid)return;
+  const secDefs=[
+    {key:'chr',num:'C',title:'ED Census',sub:'ED Charge Nurse'},
+    {key:'ecu',num:'E',title:'ECU Unit Director',sub:'5 min'},
+    {key:'opt',num:'2',title:'ED Optimizer',sub:'10 min'},
+    {key:'img',num:'📷',title:'Imaging & IR',sub:'Quick update'},
+    {key:'icu',num:'🏥',title:'ICU Status',sub:'Upgrades · Queue'},
+    {key:'hsp',num:'4',title:'Medicine Triage',sub:'8 min'},
+    {key:'crd',num:'5',title:'Case Mgmt',sub:'3 min'},
+    {key:'bed',num:'6',title:'Patient Placement',sub:'3 min'},
+    {key:'nur',num:'7',title:'IP RN Leadership',sub:'2 min'}
+  ];
+  const curIdx=state.currentSectionIndex;
+  grid.innerHTML=secDefs.map((sec,idx)=>{
+    const s=state.sections[sec.key]||{saved:false,data:{}};const d=s.data||{};const isCurrent=idx===curIdx;
+    let body='';
+    if(sec.key==='opt'&&(s.saved||d.p1))body=`<div class="bs-field-label">Prioritizations</div><div class="bs-field-val">${[d.p1,d.p2,d.p3].filter(Boolean).map((x,i)=>`${i+1}. ${x}`).join('<br>')}</div>`;
+    else if(sec.key==='hsp'&&s.saved)body=`<div class="bs-field-label">Transfers</div><div class="bs-field-val">${d.in||'—'} in · ${d.out||'—'} out</div>${d.smwv?`<div class="bs-field-label" style="margin-top:6px">SM/WV</div><div class="bs-field-val">${d.smwv}</div>`:''}`;
+    else if(sec.key==='bed'&&s.saved)body=`<div class="bs-field-label">Available</div><div class="bs-field-val">${d.avail||'—'} · ${d.opening||'—'}</div>`;
+    else if(sec.key==='ecu'&&s.saved)body=`<div class="bs-field-label">Boarders</div><div class="bs-field-val">ECU: ${d.boarders||'—'} · Hall: ${d.hall||'—'}</div>`;
+    else if(sec.key==='nur'&&s.saved)body=`<div class="bs-field-label">Boarder Plan</div><div class="bs-field-val">${d.plan||'—'}</div>`;
+    else if(sec.key==='crd'&&s.saved)body=`<div class="bs-field-label">Transfer Priority</div><div class="bs-field-val">${getTransferListText()}</div>`;
+    else if(sec.key==='icu'&&s.saved)body=`<div class="bs-field-label">ICU Notes</div><div class="bs-field-val">${d.updown||'—'}</div>`;
+    else if(sec.key==='img'&&s.saved){const delays=['ct','mri','ir'].filter(t=>document.getElementById(`img-${t}`)?.checked).map(t=>t.toUpperCase()).join(', ')||'No delays';body=`<div class="bs-field-label">Delays</div><div class="bs-field-val">${delays}</div>`;}
+    return `<div class="bs-card${isCurrent?' active-now':''}"><div class="bs-card-head"><div class="bs-num${isCurrent?' active':''}">${sec.num}</div><div><div class="bs-card-title">${sec.title}</div><div class="bs-card-sub">${sec.sub}</div></div><div class="bs-status">${isCurrent?`<span style="font-size:10px;font-weight:700;color:#90CDF4;background:rgba(39,116,174,.25);padding:3px 7px;border-radius:6px">NOW</span>`:''}<div class="bs-dot ${s.saved?'done':'empty'}"></div></div></div>${body?`<div class="bs-card-body">${body}</div>`:`<div class="bs-awaiting">Awaiting submission…</div>`}</div>`;
+  }).join('');
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  renderBeds('beds-9-12',[9,10,11,12]);
+  renderBeds('beds-22-27',[22,23,24,25,26,27]);
+  renderDispoGrid();
+  renderBigScreen();
+  initDrag();
+});
+</script>
+</body>
+</html>
