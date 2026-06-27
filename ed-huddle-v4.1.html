@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ED Huddle v4 — UCLA Health</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#2774AE;--gold:#FFD100;--dark:#003B5C;
+  --bg:#F0F4F8;--surface:#fff;--s2:#F8FAFC;--border:#E2E8F0;
+  --text:#1A202C;--muted:#64748B;--light:#94A3B8;
+  --red:#DC2626;--red-bg:#FEF2F2;
+  --amber:#B45309;--amber-bg:#FFFBEB;
+  --green:#15803D;--green-bg:#F0FDF4;
+  --purple:#7C3AED;--purple-bg:#F5F3FF;
+}
+html,body{height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased}
+.mono{font-family:"Courier New",monospace}
+.screen{display:none;height:100dvh;flex-direction:column;overflow:hidden}
+.screen.active{display:flex}
+#login{background:var(--dark);justify-content:flex-end}
+.login-top{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px 24px;gap:6px}
+.logo-mark{width:60px;height:60px;background:var(--blue);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:500;color:var(--gold);margin-bottom:10px}
+.login-top h1{font-size:22px;font-weight:700;color:#fff;text-align:center}
+.login-top p{font-size:14px;color:rgba(255,255,255,.5);text-align:center}
+.login-sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:28px 20px max(40px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:14px}
+.fl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);display:block;margin-bottom:6px}
+.fi,.fs{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:inherit;color:var(--text);background:var(--s2);-webkit-appearance:none;appearance:none}
+.fi:focus,.fs:focus{outline:none;border-color:var(--blue);background:#fff}
+.sw{position:relative}.sw::after{content:"\25BE";position:absolute;right:16px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.btn-p{width:100%;padding:16px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer}
+.btn-bs{width:100%;padding:13px;background:transparent;color:var(--dark);border:2px solid var(--border);border-radius:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
+.huddle-chip{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:10px 14px}
+.hc-dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex-shrink:0}
+.hc-txt{font-size:13px;color:var(--muted);font-weight:500}
+.app-header{background:var(--dark);padding:10px 16px;padding-top:max(10px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.hl{display:flex;align-items:center;gap:10px;min-width:0}
+.h-logo{font-size:13px;color:var(--gold);font-weight:700;white-space:nowrap}
+.h-sep{width:1px;height:18px;background:rgba(255,255,255,.2);flex-shrink:0}
+.h-title{font-size:14px;font-weight:600;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.role-pill{padding:5px 11px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;white-space:nowrap}
+.rp-opt{background:rgba(255,209,0,.18);color:var(--gold)}
+.rp-cmo{background:rgba(39,116,174,.4);color:#90CDF4}
+.rp-chr{background:rgba(129,230,217,.2);color:#5EEAD4}
+.rp-ecu{background:rgba(252,165,165,.2);color:#FCA5A5}
+.rp-nur{background:rgba(216,180,254,.2);color:#C4B5FD}
+.rp-hsp{background:rgba(167,243,208,.2);color:#6EE7B7}
+.rp-crd{background:rgba(154,230,180,.2);color:#86EFAC}
+.rp-bed{background:rgba(252,129,74,.2);color:#FB923C}
+.rp-scr{background:rgba(124,58,237,.35);color:#C4B5FD}
+.rp-vlu{background:rgba(255,209,0,.15);color:var(--gold)}
+.phase-stepper{background:var(--dark);padding:8px 16px;display:flex;align-items:center;flex-shrink:0;overflow-x:auto;scrollbar-width:none}
+.phase-stepper::-webkit-scrollbar{display:none}
+.ps-step{display:flex;align-items:center;flex-shrink:0}
+.ps-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:5px 10px;border-radius:10px;border:none;background:none;cursor:pointer;font-family:inherit}
+.ps-num{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.12);color:rgba(255,255,255,.4);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.ps-label{font-size:9px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.3);white-space:nowrap}
+.ps-btn.active .ps-num{background:var(--blue);color:#fff}
+.ps-btn.active .ps-label{color:#fff}
+.ps-btn.done .ps-num{background:var(--green);color:#fff}
+.ps-btn.done .ps-label{color:rgba(255,255,255,.5)}
+.ps-conn{width:18px;height:1px;background:rgba(255,255,255,.15);flex-shrink:0}
+.timer-bar{background:#001F33;border-bottom:1px solid rgba(255,255,255,.08);padding:7px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.timer-name{font-size:12px;font-weight:700;color:#fff;max-width:170px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.timer-right{display:flex;align-items:center;gap:8px}
+.lap-clock{font-size:20px;font-weight:700;color:#fff;min-width:52px;text-align:right}
+.lap-clock.warn{color:var(--gold)}
+.lap-clock.over{color:#F87171;animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.scr-btn{padding:6px 12px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;display:none}
+.scr-btn.show{display:inline-flex;align-items:center;gap:4px}
+.pause-btn{width:28px;height:28px;background:rgba(255,255,255,.1);border:none;border-radius:8px;color:#fff;font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center}
+.pause-btn.show{display:flex}
+.scribe-bar{background:var(--purple-bg);border-bottom:2px solid var(--purple);padding:7px 16px;display:none;align-items:center;gap:8px;flex-shrink:0}
+.scribe-bar.show{display:flex}
+.sb-dot{width:7px;height:7px;border-radius:50%;background:var(--purple);animation:blink 1.5s infinite}
+.sb-label{font-size:12px;font-weight:700;color:var(--purple)}
+.sb-hint{font-size:11px;color:var(--muted)}
+.scroll-area{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:14px 14px 0}
+.tab-bar{display:flex;gap:3px;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:4px;margin-bottom:14px}
+.tab{flex:1;padding:9px 4px;border-radius:10px;border:none;background:none;font-size:11px;font-weight:600;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
+.tab.active{background:var(--dark);color:#fff}
+.page{display:none}.page.active{display:block}
+.phs{display:none}.phs.active{display:block}
+.card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);margin-bottom:12px;overflow:hidden}
+.card-head{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:14px;font-weight:700}
+.card-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.edit-hint{font-size:10px;font-weight:600;color:var(--blue);background:#EBF8FF;padding:4px 9px;border-radius:20px;border:1px solid #BEE3F8;white-space:nowrap}
+.bed-row{display:flex;gap:8px;flex-wrap:wrap;padding:0 16px 14px}
+.bed-btn{width:56px;height:56px;border-radius:12px;border:2px solid;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;background:none;-webkit-appearance:none;font-family:inherit}
+.bed-btn .bn{font-size:15px;font-weight:700}
+.bed-btn .bs{font-size:8px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.bed-btn.occupied{background:var(--red-bg);border-color:#FCA5A5;color:var(--red)}
+.bed-btn.open-bed{background:var(--green-bg);border-color:#86EFAC;color:var(--green)}
+.bed-btn.boarding{background:var(--amber-bg);border-color:#FCD34D;color:var(--amber)}
+.bed-btn.cleaning{background:#F8FAFC;border-color:#CBD5E1;color:#64748B}
+.bed-legend{display:flex;flex-wrap:wrap;gap:10px;padding:8px 16px 12px;border-top:1px solid var(--border)}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.ld{width:10px;height:10px;border-radius:3px}
+.ld.occupied{background:var(--red)}.ld.open-bed{background:var(--green)}.ld.boarding{background:#D97706}.ld.cleaning{background:#94A3B8}
+.census-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:4px}
+.stat-tile{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:12px 6px;text-align:center}
+.sv{font-size:26px;font-weight:700;line-height:1}
+.sv.red{color:var(--red)}.sv.amb{color:var(--amber)}.sv.grn{color:var(--green)}
+.sl{font-size:9px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.census-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.ct{background:var(--s2);border:1.5px solid var(--border);border-radius:12px;padding:12px}
+.ct label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:6px}
+.ct input{width:100%;font-size:28px;font-weight:700;color:var(--text);border:none;background:none;padding:0;-webkit-appearance:none;font-family:inherit}
+.ct input:focus{outline:none;color:var(--blue)}
+.dispo-grid{display:flex;flex-direction:column;gap:10px;padding:0 16px 16px}
+.dispo-bed{background:var(--s2);border:1.5px solid var(--border);border-radius:12px;padding:12px}
+.dispo-bed-label{font-size:12px;font-weight:700;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.dispo-status{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px}
+.dispo-status.occupied{background:var(--red-bg);color:var(--red)}
+.dispo-status.boarding{background:var(--amber-bg);color:var(--amber)}
+.dispo-status.open-bed{background:var(--green-bg);color:var(--green)}
+.dispo-status.cleaning{background:#F1F5F9;color:#64748B}
+.dispo-btns{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.dispo-btn{padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:11px;font-weight:700;color:var(--muted);cursor:pointer;font-family:inherit;transition:all .15s}
+.dispo-btn.sel{background:var(--blue);border-color:var(--blue);color:#fff}
+.dispo-tf{width:100%;padding:9px 12px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;color:var(--text);background:var(--surface);-webkit-appearance:none}
+.dispo-tf:focus{outline:none;border-color:var(--blue)}
+.barrier-bar{padding:0 16px 14px;display:flex;gap:8px;align-items:center}
+.btn-barrier{display:flex;align-items:center;gap:6px;padding:10px 16px;background:var(--red-bg);border:1.5px solid #FCA5A5;border-radius:12px;color:var(--red);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+.barrier-count{font-size:11px;color:var(--muted);font-weight:600}
+.barrier-list{padding:0 16px 14px;display:flex;flex-direction:column;gap:6px}
+.barrier-item{display:flex;align-items:center;background:var(--red-bg);border:1px solid #FCA5A5;border-radius:10px;padding:10px 12px;gap:8px}
+.barrier-text{font-size:13px;color:var(--red);font-weight:600;flex:1}
+.barrier-time{font-size:10px;color:var(--light);white-space:nowrap}
+.barrier-del{background:none;border:none;color:#FCA5A5;font-size:18px;cursor:pointer;padding:0;flex-shrink:0}
+.img-row{display:flex;flex-direction:column;gap:8px;padding:0 16px 14px}
+.img-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s2);border:1.5px solid var(--border);border-radius:12px}
+.img-label{font-size:13px;font-weight:600;flex:1}
+.toggle-wrap{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle-wrap input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:#CBD5E1;border-radius:12px;cursor:pointer;transition:.2s}
+.toggle-slider::before{content:"";position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+.toggle-wrap input:checked + .toggle-slider{background:var(--red)}
+.toggle-wrap input:checked + .toggle-slider::before{transform:translateX(20px)}
+.img-detail{display:none;padding:0 16px 4px}
+.img-detail.show{display:block}
+.img-detail textarea{width:100%;padding:10px 12px;border:1.5px solid var(--red);border-radius:10px;font-size:13px;font-family:inherit;background:var(--red-bg);resize:none;min-height:60px}
+.img-detail textarea:focus{outline:none}
+.section-card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);margin-bottom:10px;overflow:hidden;transition:border-color .2s}
+.section-card.active-section{border-color:var(--blue);box-shadow:0 0 0 3px rgba(39,116,174,.12)}
+.s-head{display:flex;align-items:center;padding:14px 16px;gap:12px;cursor:pointer;user-select:none}
+.s-num{width:32px;height:32px;flex-shrink:0;background:var(--dark);color:#fff;border-radius:8px;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.s-num.mine{background:var(--blue)}
+.s-info{flex:1;min-width:0}
+.s-title{font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.s-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.s-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
+.time-tag{font-size:10px;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:3px 7px;border-radius:6px}
+.s-dot{width:9px;height:9px;border-radius:50%}
+.s-dot.done{background:var(--green)}.s-dot.draft{background:#F59E0B}.s-dot.empty{background:var(--border)}
+.chev{color:var(--light);font-size:11px;transition:transform .2s}
+.chev.open{transform:rotate(180deg)}
+.s-body{padding:0 16px 16px;display:none}
+.s-body.open{display:block}
+.sec-lap{display:flex;align-items:center;gap:6px;margin-bottom:12px;padding:8px 12px;background:var(--s2);border-radius:10px;border:1px solid var(--border)}
+.sec-lap-time{font-size:13px;font-weight:700;color:var(--text);margin-left:auto}
+.sec-lap-allot{font-size:10px;color:var(--light)}
+.fg{margin-bottom:14px}
+.fg:last-child{margin-bottom:0}
+.fla{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:7px}
+.fta{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--s2);resize:none;line-height:1.5;min-height:80px}
+.fta:focus{outline:none;border-color:var(--blue);background:#fff}
+.fin{width:100%;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;color:var(--text);background:var(--s2);-webkit-appearance:none}
+.fin:focus{outline:none;border-color:var(--blue);background:#fff}
+.nl{display:flex;flex-direction:column;gap:8px}
+.nr{display:flex;align-items:center;gap:10px}
+.nb{width:24px;height:24px;flex-shrink:0;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.nr input{flex:1;padding:12px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--text);background:var(--s2);-webkit-appearance:none}
+.nr input:focus{outline:none;border-color:var(--blue);background:#fff}
+.divider{border:none;border-top:1px solid var(--border);margin:14px 0}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.save-btn{width:100%;padding:14px;margin-top:14px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:background .15s}
+.save-btn.saved{background:var(--green)}
+.xfer-list{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+.xfer-item{display:flex;align-items:center;gap:10px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none}
+.xfer-item.dragging{opacity:.4;border-color:var(--blue)}
+.drag-handle{color:var(--light);font-size:16px;flex-shrink:0}
+.xfer-rank{width:22px;height:22px;border-radius:50%;background:var(--blue);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.xfer-text{flex:1;font-size:13px;font-weight:600;color:var(--text)}
+.xfer-dest{font-size:10px;font-weight:700;padding:2px 7px;border-radius:5px;background:var(--s2);border:1px solid var(--border);color:var(--muted)}
+.xfer-add-row{display:flex;gap:8px;margin-top:8px}
+.xfer-add-row input{flex:1;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-family:inherit;background:var(--s2);color:var(--text);-webkit-appearance:none}
+.xfer-add-row input:focus{outline:none;border-color:var(--blue);background:#fff}
+.xfer-add-row button{padding:11px 14px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+.valu-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.valu-table{width:100%;border-collapse:collapse;min-width:460px}
+.valu-table th{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 8px;border-bottom:2px solid var(--border);white-space:nowrap}
+.valu-table td{padding:7px;border-bottom:1px solid var(--border);vertical-align:top}
+.valu-table tr:last-child td{border-bottom:none}
+.valu-table input,.valu-table textarea,.valu-table select{width:100%;padding:5px 7px;border:1.5px solid var(--border);border-radius:7px;font-size:12px;font-family:inherit;background:var(--s2);color:var(--text);-webkit-appearance:none;resize:none}
+.valu-table input:focus,.valu-table textarea:focus,.valu-table select:focus{outline:none;border-color:var(--blue)}
+.esc-tag{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+.esc-tag.imm{background:var(--red-bg);color:var(--red)}
+.esc-tag.rec{background:var(--amber-bg);color:var(--amber)}
+.add-row-btn{width:100%;padding:12px;margin-top:10px;background:var(--s2);border:1.5px dashed var(--border);border-radius:12px;font-size:13px;font-weight:700;color:var(--muted);font-family:inherit;cursor:pointer}
+.live-banner{background:var(--dark);border-radius:16px;padding:16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.lb-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.45)}
+.lb-title{font-size:17px;font-weight:700;color:#fff;margin:3px 0 8px}
+.pw{background:rgba(255,255,255,.12);border-radius:4px;height:4px;width:140px}
+.pf{height:100%;border-radius:4px;background:var(--gold);transition:width .4s}
+.pt{font-size:10px;color:rgba(255,255,255,.5);margin-top:5px}
+.live-badge{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);padding:8px 13px;border-radius:20px}
+.live-dot{width:7px;height:7px;border-radius:50%;background:#4ADE80;animation:blink 1.5s infinite}
+.live-txt{font-size:12px;font-weight:700;color:#fff}
+.read-card{background:var(--surface);border-radius:16px;border:1.5px solid var(--border);margin-bottom:10px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.read-card.cur{border-color:var(--blue);box-shadow:0 0 0 3px rgba(39,116,174,.12)}
+.rh{display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}
+.rn{width:30px;height:30px;border-radius:8px;background:var(--dark);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.rm{flex:1}.r-title{font-size:14px;font-weight:700}.r-sub{font-size:11px;color:var(--muted);margin-top:1px}
+.rb{padding:14px 16px;display:flex;flex-direction:column;gap:10px}
+.rfl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:3px}
+.rfv{font-size:13px;color:var(--text);line-height:1.6}
+.rlist{list-style:none;display:flex;flex-direction:column;gap:3px}
+.rlist li{font-size:13px;color:var(--text);padding-left:14px;position:relative;line-height:1.5}
+.rlist li::before{content:"\2013";position:absolute;left:0;color:var(--light)}
+.awaiting{opacity:.4;pointer-events:none}
+.aw-tag{font-size:11px;font-weight:600;color:var(--muted);background:var(--s2);border:1px solid var(--border);padding:4px 10px;border-radius:20px}
+.pt-table{width:100%;border-collapse:collapse;margin-top:8px}
+.pt-table th{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);text-align:left;padding:5px 8px;border-bottom:1.5px solid var(--border)}
+.pt-table td{font-size:12px;padding:9px 8px;border-bottom:1px solid var(--border);vertical-align:top}
+.pt-table tr:last-child td{border-bottom:none}
+.bt{font-size:11px;font-weight:700;background:var(--blue);color:#fff;padding:2px 7px;border-radius:5px}
+.bt.b{background:#D97706}
+.stag{font-size:10px;font-weight:700}
+.stag.ok{color:var(--green)}.stag.warn{color:var(--amber)}.stag.crit{color:var(--red)}
+.ah{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ah h2{font-size:18px;font-weight:700}
+.add-btn{padding:9px 15px;background:var(--blue);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer}
+.ag-lbl{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.action-item{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-bottom:8px;display:flex;align-items:flex-start;gap:12px}
+.ac{width:22px;height:22px;flex-shrink:0;border:2px solid var(--border);border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;margin-top:1px;transition:all .15s;background:none}
+.ac.checked{background:var(--green);border-color:var(--green)}
+.ac.checked::after{content:"\2713";font-size:12px;color:#fff;font-weight:700}
+.ac-body{flex:1;min-width:0}
+.ac-text{font-size:14px;color:var(--text);line-height:1.4}
+.ac-text.done{text-decoration:line-through;color:var(--muted)}
+.ac-foot{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap}
+.ot{font-size:10px;font-weight:700;background:var(--s2);border:1px solid var(--border);padding:3px 8px;border-radius:6px;color:var(--muted)}
+.dt{font-size:10px;color:var(--light);padding:3px 0}
+.phase-nav{padding:14px 0 4px;display:flex;gap:10px}
+.pnext{flex:1;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
+.pback{padding:15px 18px;background:var(--s2);color:var(--muted);border:1.5px solid var(--border);border-radius:14px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer}
+.scribe-panel{background:var(--purple-bg);border:2px solid var(--purple);border-radius:16px;margin-bottom:12px;overflow:hidden}
+.scribe-panel-head{padding:14px 16px;display:flex;align-items:center;gap:10px}
+.sp-icon{width:32px;height:32px;border-radius:8px;background:var(--purple);color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sp-title{font-size:14px;font-weight:700;color:var(--purple)}
+.sp-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.sp-body{padding:0 16px 16px}
+.sp-select{width:100%;padding:11px 14px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:inherit;color:var(--text);background:var(--surface);margin-bottom:10px;-webkit-appearance:none}
+.bottom-nav{background:var(--surface);border-top:1px solid var(--border);display:flex;justify-content:space-around;padding:8px 0;padding-bottom:max(8px,env(safe-area-inset-bottom));flex-shrink:0}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px 14px;border-radius:10px;border:none;background:none;font-size:10px;font-weight:600;color:var(--muted);font-family:inherit;cursor:pointer}
+.nav-btn.active{color:var(--blue)}
+.ni{font-size:20px}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end}
+.overlay.open{display:flex}
+.sheet{background:var(--surface);border-radius:24px 24px 0 0;padding:20px 20px max(40px,env(safe-area-inset-bottom));width:100%;max-height:80dvh;overflow-y:auto}
+.sheet-handle{width:40px;height:4px;border-radius:2px;background:var(--border);margin:0 auto 20px}
+.sheet h3{font-size:18px;font-weight:700;margin-bottom:4px}
+.sheet p{font-size:13px;color:var(--muted);margin-bottom:18px}
+.so-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.so{padding:16px 12px;border-radius:14px;border:2px solid var(--border);text-align:center;cursor:pointer;font-family:inherit;transition:all .15s;background:none}
+.so .oi{font-size:24px;margin-bottom:4px}
+.so .ol{font-size:12px;font-weight:700;display:block}
+.so .os{font-size:10px;color:var(--muted);margin-top:2px;display:block}
+.so.s-occ{background:var(--red-bg);border-color:var(--red)}
+.so.s-opn{background:var(--green-bg);border-color:var(--green)}
+.so.s-brd{background:var(--amber-bg);border-color:#D97706}
+.so.s-cln{background:#F1F5F9;border-color:#64748B}
+.notes-f{width:100%;margin-top:14px;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:inherit;background:var(--s2);color:var(--text);resize:none;min-height:72px}
+.notes-f:focus{outline:none;border-color:var(--blue);background:#fff}
+.sheet-save{width:100%;margin-top:14px;padding:15px;background:var(--blue);color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer}
+.sheet-fields{display:flex;flex-direction:column;gap:12px;margin-top:4px}
+#bigscreen{background:#001828;overflow:hidden}
+.bs-hdr{background:#000E18;border-bottom:1px solid rgba(255,255,255,.08);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.bs-logo{font-size:14px;color:var(--gold);font-weight:700}
+.bs-title{font-size:20px;font-weight:700;color:#fff}
+.bs-meta{font-size:13px;color:rgba(255,255,255,.4)}
+.bs-clock{font-size:36px;font-weight:700;color:#fff}
+.bs-clock.warn{color:var(--gold)}.bs-clock.over{color:#F87171}
+.bs-scroll{flex:1;overflow-y:auto;padding:24px 32px}
+.bs-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;max-width:1400px;margin:0 auto 16px}
+.bs-stat{background:#00253D;border:1.5px solid rgba(255,255,255,.08);border-radius:12px;padding:14px;text-align:center}
+.bs-sv{font-size:32px;font-weight:700;line-height:1}
+.bs-sv.red{color:#F87171}.bs-sv.amb{color:#FBBF24}.bs-sv.grn{color:#4ADE80}
+.bs-sl{font-size:9px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.4);margin-top:5px}
+.bs-prog{max-width:1400px;margin:0 auto 16px;background:rgba(255,255,255,.06);border-radius:8px;height:6px;overflow:hidden}
+.bs-prog-fill{height:100%;background:var(--blue);border-radius:8px;transition:width .5s}
+.bs-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:1400px;margin:0 auto}
+.bs-card{background:#00253D;border:1.5px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.bs-card.now{border-color:var(--blue);box-shadow:0 0 0 3px rgba(39,116,174,.25)}
+.bs-card-hd{padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.06);display:flex;align-items:center;gap:10px}
+.bs-n{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.6);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.bs-n.active{background:var(--blue);color:#fff}
+.bs-ct{font-size:13px;font-weight:700;color:#fff}
+.bs-cs{font-size:10px;color:rgba(255,255,255,.4);margin-top:2px}
+.bs-status{margin-left:auto;display:flex;align-items:center;gap:6px}
+.bs-dot{width:7px;height:7px;border-radius:50%}
+.bs-dot.done{background:#4ADE80}.bs-dot.empty{background:rgba(255,255,255,.2)}
+.bs-body{padding:14px 16px;display:flex;flex-direction:column;gap:8px}
+.bs-fl{font-size:9px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.35);margin-bottom:3px}
+.bs-fv{font-size:12px;color:rgba(255,255,255,.85);line-height:1.5}
+.bs-await{padding:14px 16px;font-size:12px;color:rgba(255,255,255,.3);font-style:italic}
+.bs-ftr{padding:12px 32px;border-top:1px solid rgba(255,255,255,.06);display:flex;align-items:center;flex-shrink:0}
+.bs-ftr-note{font-size:11px;color:rgba(255,255,255,.3)}
+.bs-back{padding:8px 14px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:8px;color:rgba(255,255,255,.6);font-size:12px;font-weight:600;font-family:inherit;cursor:pointer;margin-left:auto}
+.scroll-pad{height:24px}
+.census-owner{font-size:10px;color:var(--muted);text-align:right;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<div id="login" class="screen active">
+  <div class="login-top">
+    <div class="logo-mark">ValU</div>
+    <h1>ED Throughput Huddle</h1>
+    <p>UCLA Health &middot; Daily 2:00 PM</p>
+  </div>
+  <div class="login-sheet">
+    <div><label class="fl">Email</label><input class="fi" type="email" value="j.chen@ucla.edu"/></div>
+    <div><label class="fl">My Role</label>
+      <div class="sw"><select class="fs" id="role-sel">
+        <option value="opt">ED Optimizer (Physician)</option>
+        <option value="chr">ED Charge Nurse</option>
+        <option value="ecu">ECU Charge / Unit Director</option>
+        <option value="cmo">CMO / Executive</option>
+        <option value="hsp">Hospitalist Triage Officer</option>
+        <option value="nur">ED Nursing Director</option>
+        <option value="crd">Care Coordination / Case Mgmt</option>
+        <option value="bed">Bed / Patient Placement</option>
+        <option value="scr">Scribe / Recorder</option>
+        <option value="vlu">ValU Team (Facilitator)</option>
+      </select></div>
+    </div>
+    <button class="btn-p" onclick="signIn()">Sign in &rarr;</button>
+    <button class="btn-bs" onclick="openBigScreen()">&#128253; Open Big Screen Dashboard</button>
+    <div class="huddle-chip"><div class="hc-dot"></div><span class="hc-txt">Next huddle: Fri Jun 26 &middot; 2:00 PM</span></div>
+  </div>
+</div>
+
+<div id="app" class="screen">
+  <div class="app-header">
+    <div class="hl"><span class="h-logo">ValU</span><div class="h-sep"></div><span class="h-title">ED Huddle &middot; 6/26</span></div>
+    <span class="role-pill rp-opt" id="role-pill">Optimizer</span>
+  </div>
+  <div class="phase-stepper">
+    <div class="ps-step"><button class="ps-btn active" id="ps0" onclick="goPhase(0)"><div class="ps-num">0</div><div class="ps-label">Pre-Huddle</div></button></div>
+    <div class="ps-conn"></div>
+    <div class="ps-step"><button class="ps-btn" id="ps1" onclick="goPhase(1)"><div class="ps-num">1</div><div class="ps-label">Walk-Through</div></button></div>
+    <div class="ps-conn"></div>
+    <div class="ps-step"><button class="ps-btn" id="ps2" onclick="goPhase(2)"><div class="ps-num">2</div><div class="ps-label">Huddle</div></button></div>
+    <div class="ps-conn"></div>
+    <div class="ps-step"><button class="ps-btn" id="ps3" onclick="goPhase(3)"><div class="ps-num">3</div><div class="ps-label">Close Loop</div></button></div>
+  </div>
+  <div class="timer-bar">
+    <div class="timer-name" id="timer-name">Pre-Huddle</div>
+    <div class="timer-right">
+      <div class="lap-clock" id="lap-clock">0:00</div>
+      <button class="pause-btn" id="pause-btn" onclick="togglePause()">&#9646;&#9646;</button>
+      <button class="scr-btn" id="next-btn" onclick="nextSection()">Next &rsaquo;</button>
+    </div>
+  </div>
+  <div class="scribe-bar" id="scribe-bar">
+    <div class="sb-dot"></div><span class="sb-label">SCRIBE MODE</span><span class="sb-hint">You can edit any section</span>
+  </div>
+  <div class="scroll-area">
+    <div class="tab-bar">
+      <button class="tab active" onclick="showTab('report',this)">Report</button>
+      <button class="tab" onclick="showTab('live',this)">Live</button>
+      <button class="tab" onclick="showTab('actions',this)">Actions</button>
+      <button class="tab" onclick="showTab('closeloop',this)">Close Loop</button>
+    </div>
+
+    <div id="report" class="page active">
+
+      <!-- PHASE 0 -->
+      <div class="phs active" id="phs-0">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">&#128203; Pre-Huddle Setup</div><div class="card-sub">Census &middot; Bed status &middot; Role check-in</div></div></div>
+          <div style="padding:0 16px 16px">
+            <div class="census-grid">
+              <div class="ct"><label>Total ED Pts</label><input type="number" id="f-total" value="38" oninput="syncCensus()"/></div>
+              <div class="ct"><label>Boarding</label><input type="number" id="f-board" value="12" oninput="syncCensus()"/></div>
+              <div class="ct"><label>Open Beds</label><input type="number" id="f-open" value="2" oninput="syncCensus()"/></div>
+              <div class="ct"><label>High Acuity</label><input type="number" id="f-acuity" value="6" oninput="syncCensus()"/></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">&#128717; Protected Beds &middot; 9&ndash;12</div><div class="card-sub">Goal: reserved for high-acuity / resus</div></div><span class="edit-hint">Tap to update</span></div>
+          <div class="bed-row" id="beds-9-12"></div>
+          <div class="bed-legend"><div class="li"><div class="ld occupied"></div>Occupied</div><div class="li"><div class="ld open-bed"></div>Open</div><div class="li"><div class="ld boarding"></div>Boarding</div><div class="li"><div class="ld cleaning"></div>Cleaning</div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">&#128695; Fast Track &middot; 22&ndash;27</div><div class="card-sub">Goal: available for lower-acuity</div></div><span class="edit-hint">Tap to update</span></div>
+          <div class="bed-row" id="beds-22-27"></div>
+          <div class="bed-legend"><div class="li"><div class="ld occupied"></div>Occupied</div><div class="li"><div class="ld open-bed"></div>Open</div><div class="li"><div class="ld boarding"></div>Boarding</div><div class="li"><div class="ld cleaning"></div>Cleaning</div></div>
+        </div>
+        <div class="census-bar">
+          <div class="stat-tile"><div class="sv red" id="stat-t">38</div><div class="sl">Census</div></div>
+          <div class="stat-tile"><div class="sv amb" id="stat-b">12</div><div class="sl">Boarding</div></div>
+          <div class="stat-tile"><div class="sv grn" id="stat-o">2</div><div class="sl">Open</div></div>
+          <div class="stat-tile"><div class="sv red" id="stat-a">6</div><div class="sl">Hi Acuity</div></div>
+        </div>
+        <div class="census-owner">Updated by ED Charge + ECU Charge</div>
+        <div class="phase-nav"><button class="pnext" onclick="goPhase(1)">Begin Walk-Through &rarr;</button></div>
+        <div class="scroll-pad"></div>
+      </div>
+
+      <!-- PHASE 1 -->
+      <div class="phs" id="phs-1">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">&#128694; Walk-Through &middot; 15 min</div><div class="card-sub">Outside ED &rarr; Core Area &rarr; CMO RN check-in</div></div></div>
+          <div style="padding:0 16px 16px">
+            <div class="fg"><label class="fla">Observations</label><textarea class="fta" id="f-wt-obs" placeholder="What are you seeing on the floor? Capacity, flow, notable patients&#8230;"></textarea></div>
+            <div class="fg"><label class="fla">CMO / Charge RN Check-in Notes</label><textarea class="fta" id="f-wt-cmo" style="min-height:64px" placeholder="Quick notes from CMO RN or Charge RN touchpoint&#8230;"></textarea></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">&#128680; Barriers Identified</div><div class="card-sub">Tap the button to log as you walk</div></div></div>
+          <div class="barrier-bar"><button class="btn-barrier" onclick="openBarrier('wt')">+ Log Barrier</button><span class="barrier-count" id="bc-wt">0 logged</span></div>
+          <div class="barrier-list" id="bl-wt"></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">&#128717; Beds 9&ndash;12 &middot; Anticipated Dispo</div><div class="card-sub">Select dispo + timeframe for each bed</div></div></div>
+          <div class="dispo-grid" id="dispo-grid"></div>
+        </div>
+        <div class="phase-nav">
+          <button class="pback" onclick="goPhase(0)">&larr; Back</button>
+          <button class="pnext" onclick="goPhase(2)">Start Huddle &rarr;</button>
+        </div>
+        <div class="scroll-pad"></div>
+      </div>
+
+      <!-- PHASE 2 -->
+      <div class="phs" id="phs-2">
+        <div class="scribe-panel" id="scribe-panel" style="display:none">
+          <div class="scribe-panel-head"><div class="sp-icon">&#9999;&#65039;</div><div><div class="sp-title">Scribe Panel</div><div class="sp-sub">Jump to section &middot; broadcast notes</div></div></div>
+          <div class="sp-body">
+            <div class="sw" style="margin-bottom:10px"><select class="sp-select" onchange="scribeJump(this.value)">
+              <option value="">&#8212; jump to section &#8212;</option>
+              <option value="sec-chr">ED Census (Charge Nurse)</option>
+              <option value="sec-ecu">ECU Unit Director</option>
+              <option value="sec-opt">ED Optimizer</option>
+              <option value="sec-img">Imaging &amp; IR</option>
+              <option value="sec-icu">ICU Status</option>
+              <option value="sec-hsp">Medicine Triage</option>
+              <option value="sec-crd">Case Mgmt / Transfers</option>
+              <option value="sec-bed">Patient Placement</option>
+              <option value="sec-nur">IP RN Leadership</option>
+            </select></div>
+            <div class="fg"><label class="fla">Global scribe notes (broadcast to all)</label><textarea class="fta" id="scribe-notes" placeholder="Live notes for the room&#8230;" oninput="syncScribeNotes()"></textarea></div>
+          </div>
+        </div>
+
+        <div class="section-card role-section" id="sec-chr" data-allotted="3" style="display:none">
+          <div class="s-head" onclick="toggleSec(this)"><div class="s-num mine">C</div><div class="s-info"><div class="s-title">ED Census Entry</div><div class="s-sub">ED Charge Nurse</div></div><div class="s-right"><div class="s-dot draft"></div><span class="chev open">&#9662;</span></div></div>
+          <div class="s-body open">
+            <div class="sec-lap"><span>&#9201;</span><span style="font-size:11px;color:var(--muted);font-weight:600;margin-left:6px">Lap</span><span class="sec-lap-time" id="lt-sec-chr">&#8212;</span><span class="sec-lap-allot">/ 3 min</span></div>
+            <div class="census-grid">
+              <div class="ct"><label>Total ED Pts</label><input type="number" id="f2-total" value="38" oninput="syncCensus2()"/></div>
+              <div class="ct"><label>Boarding</label><input type="number" id="f2-board" value="12" oninput="syncCensus2()"/></div>
+              <div class="ct"><label>Open Beds</label><input type="number" id="f2-open" value="2" oninput="syncCensus2()"/></div>
+              <div class="ct"><label>High Acuity</label><input type="number" id="f2-acuity" value="6" oninput="syncCensus2()"/></div>
+            </div>
+            <div class="fg"><label class="fla">Flags / notable patients</label><textarea class="fta" id="f-chr-flags" oninput="sync('chr')">Bed 11 &#8212; trach/cerebral palsy, high complexity. Hall near 12 may need upgrade.</textarea></div>
+            <button class="save-btn" onclick="markSaved(this,'chr')">Save Census</button>
+          </div>
+        </div>
+
+        <div class="section-card role-section" id="sec-ecu" data-allotted="5" style="display:none">
+          <div class="s-head" onclick="toggleSec(this)"><div class="s-num mine">E</div><div class="s-info"><div class="s-title">ECU Unit Director</div><div class="s-sub">Boarders &middot; Longest LOS &middot; Challenges</div></div><div class="s-right"><span class="time-tag">5 min</span><div class="s-dot empty"></div><span class="chev open">&#9662;</span></div></div>
+          <div class="s-body open">
+            <div class="sec-lap"><span>&#9201;</span><span style="font-size:11px;color:var(--muted);font-weight:600;margin-left:6px">Lap</span><span class="sec-lap-time" id="lt-sec-ecu">&#8212;</span><span class="sec-lap-allot">/ 5 min</span></div>
+            <div class="census-grid">
+              <div class="ct"><label>ECU Boarders</label><input type="number" id="f-ecu-b" placeholder="0" oninput="sync('ecu')"/></div>
+              <div class="ct"><label>Hall Boarders</label><input type="number" id="f-ecu-h" placeholder="0" oninput="sync('ecu')"/></div>
+            </div>
+            <div class="fg"><label class="fla">Longest LOS patients</label><textarea class="fta" id="f-ecu-los" placeholder="Bed #, patient situation, LOS&#8230;" style="min-height:64px" oninput="sync('ecu')"></textarea></div>
+            <div class="fg"><label class="fla">Challenges / flags</label><textarea class="fta" id="f-ecu-flags" placeholder="Current challenges, boarding status, plans&#8230;" oninput="sync('ecu')"></textarea></div>
+            <button class="save-btn" onclick="markSaved(this,'ecu')">Save ECU Report</button>
+          </div>
+        </div>
+
+        <div class="section-card role-section" id="sec-opt" data-allotted="10">
+          <div class="s-head" onclick="toggleSec(this)"><div class="s-num mine" id="opt-num">2</div><div class="s-info"><div class="s-title">ED Optimizer + Nursing Dir.</div><div class="s-sub">Walk rounds &middot; DESA &middot; Prioritizations</div></div><div class="s-right"><span class="time-tag">10 min</span><div class="s-dot draft"></div><span class="chev open">&#9662;</span></div></div>
+          <div class="s-body open">
+            <div class="sec-lap"><span>&#9201;</span><span style="font-size:11px;color:var(--muted);font-weight:600;margin-left:6px">Lap</span><span class="sec-lap-time" id="lt-sec-opt">&#8212;</span><span class="sec-lap-allot">/ 10 min</span></div>
+            <div class="fg"><label class="fla">Walk Rounds Summary (incl. beds beyond 9&ndash;12)</label><textarea class="fta" id="f-opt-rounds" oninput="sync('opt')">Walk rounds complete. Bed 12 needs MICU eval &#8212; Airborne precautions. Should #12 be upgraded?</textarea></div>
+            <div class="fg"><label class="fla">DESA Escalations</label><textarea class="fta" id="f-opt-desa" oninput="sync('opt')">Bed 9 (urology/Foley) &#8594; 7W &#10003;&#10;Bed 10 (pre-liver tx/Foley) &#8594; GOU/5SEMS &#10003;&#10;Transport pending both.</textarea></div>
+            <hr class="divider">
+            <div class="fg"><label class="fla">Top 3 Prioritizations</label>
+              <div class="nl">
+                <div class="nr"><div class="nb">1</div><input type="text" id="f-opt-p1" value="H11A &#8212; 20+ admissions, expedition to recuperative referral" oninput="sync('opt')"/></div>
+                <div class="nr"><div class="nb">2</div><input type="text" id="f-opt-p2" value="H12B &#8212; Refused SM/WV transfers, need alt plan" oninput="sync('opt')"/></div>
+                <div class="nr"><div class="nb">3</div><input type="text" id="f-opt-p3" value="Bed 12 MICU eval &#8212; Airborne, review chart" oninput="sync('opt')"/></div>
+              </div>
+            </div>
+            <hr class="divider">
+            <div class="fg"><label class="fla">Top 3 Recurring Barriers</label>
+              <div class="nl">
+                <div class="nr"><div class="nb">1</div><input type="text" id="f-opt-b1" value="Close loop on morning escalations" oninput="sync('opt')"/></div>
+                <div class="nr"><div class="nb">2</div><input type="text" id="f-opt-b2" value="SM/WV transfer refusals ongoing" oninput="sync('opt')"/></div>
+                <div class="nr"><div class="nb">3</div><input type="text" id="f-opt-b3" value="Bed 38 solid onc &#8212; transfer to SM pending" oninput="sync('opt')"/></div>
+              </div>
+            </div>
+            <button class="save-btn" onclick="markSaved(this,'opt')">Save My Report</button>
+          </div>
+        </div>
+
+        <div class="section-card" id="sec-img">
+          <div class="s-head" onclick="toggleSec(this)"><div class="s-num">&#128247;</div><div class="s-info"><div class="s-title">Imaging &amp; IR</div><div class="s-sub">CT &middot; MRI &middot; IR bottlenecks</div></div><div class="s-right"><div class="s-dot empty" id="dot-img"></div><span class="chev">&#9662;</span></div></div>
+          <div class="s-body">
+            <div class="img-row">
+              <div class="img-item"><span class="img-label">CT delays?</span><label class="toggle-wrap"><input type="checkbox" id="img-ct" onchange="toggleImg('ct')"><span class="toggle-slider"></span></label></div>
+              <div class="img-detail" id="id-ct"><textarea placeholder="CT delay details &#8212; wait time, # pending&#8230;"></textarea></div>
+              <div class="img-item"><span class="img-label">MRI delays?</span><label class="toggle-wrap"><input type="checkbox" id="img-mri" onchange="toggleImg('mri')"><span class="toggle-slider"></span></label></div>
+              <div class="img-detail" id="id-mri"><textarea placeholder="MRI delay details&#8230;"></textarea></div>
+              <div class="img-item"><span class="img-label">IR bottleneck?</span><label class="toggle-wrap"><input type="checkbox" id="img-ir" onchange="toggleImg('ir')"><span class="toggle-slider"></span></label></div>
+              <div class="img-detail" id="id-ir"><textarea placeholder="IR bottleneck details&#8230;"></textarea></div>
+            </div>
+            <div style="padding:0 0 4px"><button class="save-btn" onclick="markImgSaved()">Save Imaging</button></div>
+          </div>
+        </div>
+
+        <div class="section-card" id="sec-icu">
+          <div class="s-head" onclick="toggleSec(this)"><div class="s-num">&#127973;</div><div class="s-info"><div class="s-title">ICU Status &amp; MICU Queue</div><div class="s-sub">Upgrades &middot; Downgrades &middot; MICU availability</div></div><div class="s-right"><div class="s-dot empty" id="dot-icu"></div><span class="chev">&#9662;</span></div></div>
+          <div class="s-body">
+            <div class="fg"><label class="fla">Upgrade / Downgrade Notes</label><textarea class="fta" id="f-icu-ud" placeholder="e.g. Bed 12 &#8594; MICU upgrade pending &middot; Bed 5 downgrade to floor&#8230;" oninput="sync('icu')"></textarea></div>
+            <div class="fg"><label class="fla">MICU Bed Availability</label><textarea class="fta" id="f-icu-micu" placeholder="How many MICU beds available? Where is ED in the queue?" style="min-height:64px" oninput="sync('icu')"></textarea></div>
+            <button class="save-btn" onclick="markSaved(this,'icu')">Save ICU Status</button>
+          </div>
+        </div>
+
+        <div class="section-card role-section" id="sec-hsp" data-allotted="8" style="display:none">
+          <div class="s-head" onclick="toggleSec(this)"><div class="s-num mine">4</div><div class="s-info"><div class="s-title">Medicine Triage + ECU Lead</div><div class="s-sub">SM / WV prioritization</div></div><div class="s-right"><span class="time-tag">8 min</span><div class="s-dot empty"></div><span class="chev open">&#9662;</span></div></div>
+          <div class="s-body open">
+            <div class="sec-lap"><span>&#9201;</span><span style="font-size:11px;color:var(--muted);font-weight:600;margin-left:6px">Lap</span><span class="sec-lap-time" id="lt-sec-hsp">&#8212;</span><span class="sec-lap-allot">/ 8 min</span></div>
+            <div class="two-col">
+              <div class="fg"><label class="fla">Transfers In</label><input class="fin" type="number" id="f-hsp-in" placeholder="0" oninput="sync('hsp')"/></div>
+              <div class="fg"><label class="fla">Transfers Out</label><input class="fin" type="number" id="f-hsp-out" placeholder="0" oninput="sync('hsp')"/></div>
+            </div>
+            <div class="fg"><label class="fla">Patients to prioritize for SM / WV</label><textarea class="fta" id="f-hsp-smwv" placeholder="Which patients should be prioritized?" style="min-height:64px" oninput="sync('hsp')"></textarea></div>
+            <div class="fg"><label class="fla">Pending Discharges / Transfers</label><textarea class="fta" id="f-hsp-pend" placeholder="List bed #s or names&#8230;" style="min-height:64px" oninput="sync('hsp')"></textarea></div>
+            <hr class="divider">
+            <div class="fg"><label class="fla">Top 3 Prioritizations</label>
+              <div class="nl">
+                <div class="nr"><div class="nb">1</div><input type="text" id="f-hsp-p1" placeholder="Priority 1&#8230;" oninput="sync('hsp')"/></div>
+                <div class="nr"><div class="nb">2</div><input type="text" id="f-hsp-p2" placeholder="Priority 2&#8230;" oninput="sync('hsp')"/></div>
+                <div class="nr"><div class="nb">3</div><input type="text" id="f-hsp-p3" placeholder="Priority 3&#8230;" oninput="sync('hsp')"/></div>
+              </div>
+            </div>
+            <button class="save-btn" onclick="markSaved(this,'hsp')">Save My Report</button>
+          </div>
+        </div>
+
+        <div class="section-card role-section" id="sec-crd" data-allotted="3" style="display:none">
+          <div class="s-head" onclick="toggleSec(this)"><div class="s-num mine">5</div><div class="s-info"><div class="s-title">Case Mgmt &middot; Transfer Priority</div><div class="s-sub">Drag to reorder after group discussion</div></div><div class="s-right"><span class="time-tag">3 min</span><div class="s-dot empty"></div><span class="chev open">&#9662;</span></div></div>
+          <div class="s-body open">
+            <div class="sec-lap"><span>&#9201;</span><span style="font-size:11px;color:var(--muted);font-weight:600;margin-left:6px">Lap</span><span class="sec-lap-time" id="lt-sec-crd">&#8212;</span><span class="sec-lap-allot">/ 3 min</span></div>
+            <div class="fg">
+              <label class="fla">Transfer Priority List &middot; drag to reorder</label>
+              <div class="xfer-list" id="xfer-list">
+                <div class="xfer-item" draggable="true"><span class="drag-handle">&#10783;</span><div class="xfer-rank">1</div><span class="xfer-text">H11A &#8212; recuperative referral</span><span class="xfer-dest">SM</span></div>
+                <div class="xfer-item" draggable="true"><span class="drag-handle">&#10783;</span><div class="xfer-rank">2</div><span class="xfer-text">H12B &#8212; alt plan needed</span><span class="xfer-dest">WV</span></div>
+                <div class="xfer-item" draggable="true"><span class="drag-handle">&#10783;</span><div class="xfer-rank">3</div><span class="xfer-text">Bed 38 solid onc</span><span class="xfer-dest">SM</span></div>
+              </div>
+              <div class="xfer-add-row"><input type="text" id="xfer-input" placeholder="Patient / bed # &middot; destination"/><button onclick="addXfer()">+ Add</button></div>
+            </div>
+            <div class="fg"><label class="fla">Feedback on prior huddle transfers</label><textarea class="fta" id="f-crd-fb" placeholder="Close loop on yesterday&#39;s requests&#8230;" oninput="sync('crd')"></textarea></div>
+            <button class="save-btn" onclick="markSaved(this,'crd')">Save Transfer List</button>
+          </div>
+        </div>
+
+        <div class="section-card role-section" id="sec-bed" data-allotted="3" style="display:none">
+          <div class="s-head" onclick="toggleSec(this)"><div class="s-num mine">6</div><div class="s-info"><div class="s-title">Patient Placement</div><div class="s-sub">Priorities &middot; ICU review &middot; Shared rooms</div></div><div class="s-right"><span class="time-tag">3 min</span><div class="s-dot empty"></div><span class="chev open">&#9662;</span></div></div>
+          <div class="s-body open">
+            <div class="sec-lap"><span>&#9201;</span><span style="font-size:11px;color:var(--muted);font-weight:600;margin-left:6px">Lap</span><span class="sec-lap-time" id="lt-sec-bed">&#8212;</span><span class="sec-lap-allot">/ 3 min</span></div>
+            <div class="fg"><label class="fla">High-priority bed movements</label><textarea class="fta" id="f-bed-pri" placeholder="Which beds are highest priority for movement?" oninput="sync('bed')"></textarea></div>
+            <div class="fg"><label class="fla">Likelihood feedback</label><textarea class="fta" id="f-bed-lkly" placeholder="Honest assessment &#8212; which may or may not get a bed&#8230;" style="min-height:64px" oninput="sync('bed')"></textarea></div>
+            <div class="two-col">
+              <div class="fg"><label class="fla">Beds Available</label><input class="fin" type="text" id="f-bed-avail" placeholder="e.g. 3 on 3N" oninput="sync('bed')"/></div>
+              <div class="fg"><label class="fla">Opening for ED</label><input class="fin" type="text" id="f-bed-open" placeholder="e.g. 2 by 3pm" oninput="sync('bed')"/></div>
+            </div>
+            <div class="fg"><label class="fla">Shared rooms &middot; M/F matching notes</label><textarea class="fta" id="f-bed-shared" placeholder="Shared room opportunities? ECU admits without orders? M/F availability&#8230;" style="min-height:64px" oninput="sync('bed')"></textarea></div>
+            <div class="fg"><label class="fla">ICU snapshot</label><textarea class="fta" id="f-bed-icu" placeholder="Quick ICU in/out summary&#8230;" style="min-height:64px" oninput="sync('bed')"></textarea></div>
+            <button class="save-btn" onclick="markSaved(this,'bed')">Save Placement Report</button>
+          </div>
+        </div>
+
+        <div class="section-card role-section" id="sec-nur" data-allotted="2" style="display:none">
+          <div class="s-head" onclick="toggleSec(this)"><div class="s-num mine">7</div><div class="s-info"><div class="s-title">IP RN Leadership</div><div class="s-sub">Boarder plan &middot; Next steps</div></div><div class="s-right"><span class="time-tag">2 min</span><div class="s-dot empty"></div><span class="chev open">&#9662;</span></div></div>
+          <div class="s-body open">
+            <div class="sec-lap"><span>&#9201;</span><span style="font-size:11px;color:var(--muted);font-weight:600;margin-left:6px">Lap</span><span class="sec-lap-time" id="lt-sec-nur">&#8212;</span><span class="sec-lap-allot">/ 2 min</span></div>
+            <div class="fg"><label class="fla">Plan for clearing boarders (beds 9&ndash;12)</label><textarea class="fta" id="f-nur-plan" placeholder="Specific plan per protected bed&#8230;" oninput="sync('nur')"></textarea></div>
+            <div class="fg"><label class="fla">Action Items / Next Steps</label><textarea class="fta" id="f-nur-acts" placeholder="What happens after this huddle&#8230;" style="min-height:64px" oninput="sync('nur')"></textarea></div>
+            <button class="save-btn" onclick="markSaved(this,'nur')">Save IP RN Report</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:4px">
+          <div class="card-head"><div><div class="card-title">&#128680; Huddle Barriers</div><div class="card-sub">Log barriers raised during discussion</div></div></div>
+          <div class="barrier-bar"><button class="btn-barrier" onclick="openBarrier('huddle')">+ Log Barrier</button><span class="barrier-count" id="bc-huddle">0 logged</span></div>
+          <div class="barrier-list" id="bl-huddle"></div>
+        </div>
+
+        <div class="phase-nav">
+          <button class="pback" onclick="goPhase(1)">&larr; Walk-Through</button>
+          <button class="pnext" onclick="goPhase(3)">Close Loop &rarr;</button>
+        </div>
+        <div class="scroll-pad"></div>
+      </div>
+
+      <!-- PHASE 3 -->
+      <div class="phs" id="phs-3">
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">&#10003; Close Loop &middot; Follow-Up</div><div class="card-sub">ValU table &middot; Outstanding items</div></div></div>
+          <div style="padding:0 16px 16px"><div class="fg"><label class="fla">Summary notes</label><textarea class="fta" id="f-cl-sum" placeholder="Overall huddle summary, key themes, outstanding questions&#8230;"></textarea></div></div>
+        </div>
+        <div class="card">
+          <div class="card-head"><div><div class="card-title">&#128202; Escalation Table</div><div class="card-sub">Started by Scribe &middot; finalized by ValU</div></div></div>
+          <div style="padding:0 16px 16px">
+            <div class="valu-wrap">
+              <table class="valu-table">
+                <thead><tr><th>Type</th><th>Bed</th><th>MRN</th><th>Issue</th><th>Next Steps</th><th>Notes</th><th></th></tr></thead>
+                <tbody id="valu-tbody">
+                  <tr><td><select><option>Immediate</option><option>Recurring</option></select></td><td><input placeholder="Bed #"/></td><td><input placeholder="MRN"/></td><td><textarea placeholder="Issue&#8230;" rows="2"></textarea></td><td><textarea placeholder="Next steps&#8230;" rows="2"></textarea></td><td><textarea placeholder="Notes&#8230;" rows="2"></textarea></td><td><button onclick="delRow(this)" style="background:none;border:none;color:var(--light);font-size:18px;cursor:pointer">&#215;</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <button class="add-row-btn" onclick="addRow()">+ Add Row</button>
+          </div>
+        </div>
+        <div class="phase-nav">
+          <button class="pback" onclick="goPhase(2)">&larr; Huddle</button>
+          <button class="pnext" style="background:var(--green)" onclick="completeHuddle()">Complete Huddle &#10003;</button>
+        </div>
+        <div class="scroll-pad"></div>
+      </div>
+
+    </div><!-- end report -->
+
+    <div id="live" class="page">
+      <div class="live-banner">
+        <div class="lb-left">
+          <div class="lb-lbl">CMO ED Throughput Huddle</div>
+          <div class="lb-title">Fri June 26 &middot; 2:00 PM</div>
+          <div class="pw"><div class="pf" id="live-prog" style="width:14%"></div></div>
+          <div class="pt" id="live-prog-txt">1 of 7 sections complete</div>
+        </div>
+        <div class="live-badge"><div class="live-dot"></div><span class="live-txt">LIVE</span></div>
+      </div>
+      <div class="read-card">
+        <div class="rh"><div class="rn" style="background:var(--gold);color:var(--dark)">&#128717;</div><div class="rm"><div class="r-title">Protected Bed Status</div><div class="r-sub">Updated pre-huddle</div></div><div class="s-dot done"></div></div>
+        <div class="rb">
+          <div><div class="rfl">Beds 9&ndash;12</div>
+            <table class="pt-table"><thead><tr><th>Bed</th><th>Patient / Note</th><th>Status</th></tr></thead>
+            <tbody><tr><td><span class="bt">9</span></td><td>Urology &middot; Foley</td><td><span class="stag ok">&#8594; 7W &#10003;</span></td></tr>
+            <tr><td><span class="bt">10</span></td><td>Pre-liver tx</td><td><span class="stag ok">&#8594; GOU &#10003;</span></td></tr>
+            <tr><td><span class="bt b">11</span></td><td>Trach &middot; cerebral palsy</td><td><span class="stag warn">Boarding</span></td></tr>
+            <tr><td><span class="bt b">12</span></td><td>Svc capped &middot; ophtho</td><td><span class="stag crit">MICU eval needed</span></td></tr></tbody></table>
+          </div>
+          <div style="display:flex;gap:16px">
+            <div><div class="sv red" id="live-t" style="font-size:20px">38</div><div class="sl">Total</div></div>
+            <div><div class="sv amb" id="live-b" style="font-size:20px">12</div><div class="sl">Boarding</div></div>
+            <div><div class="sv grn" id="live-o" style="font-size:20px">2</div><div class="sl">Open</div></div>
+            <div><div class="sv red" id="live-a" style="font-size:20px">6</div><div class="sl">Hi Acuity</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="read-card awaiting" id="lc-opt"><div class="rh"><div class="rn">2</div><div class="rm"><div class="r-title">ED Optimizer</div><div class="r-sub">10 min</div></div><span class="aw-tag">Awaiting&#8230;</span></div></div>
+      <div class="read-card awaiting" id="lc-ecu"><div class="rh"><div class="rn">E</div><div class="rm"><div class="r-title">ECU Unit Director</div><div class="r-sub">5 min</div></div><span class="aw-tag">Awaiting&#8230;</span></div></div>
+      <div class="read-card awaiting" id="lc-img"><div class="rh"><div class="rn">&#128247;</div><div class="rm"><div class="r-title">Imaging &amp; IR</div><div class="r-sub">Quick update</div></div><span class="aw-tag">Awaiting&#8230;</span></div></div>
+      <div class="read-card awaiting" id="lc-hsp"><div class="rh"><div class="rn">4</div><div class="rm"><div class="r-title">Medicine Triage</div><div class="r-sub">8 min</div></div><span class="aw-tag">Awaiting&#8230;</span></div></div>
+      <div class="read-card awaiting" id="lc-crd"><div class="rh"><div class="rn">5</div><div class="rm"><div class="r-title">Case Mgmt / Transfers</div><div class="r-sub">3 min</div></div><span class="aw-tag">Awaiting&#8230;</span></div></div>
+      <div class="read-card awaiting" id="lc-bed"><div class="rh"><div class="rn">6</div><div class="rm"><div class="r-title">Patient Placement</div><div class="r-sub">3 min</div></div><span class="aw-tag">Awaiting&#8230;</span></div></div>
+      <div class="read-card awaiting" id="lc-nur"><div class="rh"><div class="rn">7</div><div class="rm"><div class="r-title">IP RN Leadership</div><div class="r-sub">2 min</div></div><span class="aw-tag">Awaiting&#8230;</span></div></div>
+      <div id="live-scribe-block" style="display:none;margin-top:14px">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--purple);margin-bottom:6px">Scribe Notes</div>
+        <div style="background:var(--purple-bg);border:1.5px solid rgba(124,58,237,.3);border-radius:12px;padding:13px 14px;font-size:13px;line-height:1.6" id="live-scribe-txt"></div>
+      </div>
+      <div class="scroll-pad"></div>
+    </div>
+
+    <div id="actions" class="page">
+      <div class="ah"><h2>Actions</h2><button class="add-btn" onclick="openAction()">+ Add</button></div>
+      <div class="ag-lbl">Today &middot; June 26</div>
+      <div id="action-list">
+        <div class="action-item"><button class="ac" onclick="chk(this)"></button><div class="ac-body"><div class="ac-text">Transport beds 9 &amp; 10 &#8212; verify movement by 3pm</div><div class="ac-foot"><span class="ot">Bed Placement</span><span class="dt">Due today</span></div></div></div>
+        <div class="action-item"><button class="ac" onclick="chk(this)"></button><div class="ac-body"><div class="ac-text">MICU eval for bed 12 &#8212; Airborne precautions</div><div class="ac-foot"><span class="ot">Hospitalist</span><span class="dt">Urgent</span></div></div></div>
+        <div class="action-item"><button class="ac" onclick="chk(this)"></button><div class="ac-body"><div class="ac-text">H11A recuperative referral &#8212; expedite</div><div class="ac-foot"><span class="ot">Care Coord</span><span class="dt">Due today</span></div></div></div>
+      </div>
+      <div style="margin-top:20px">
+        <div class="ag-lbl">Carried over &middot; June 24</div>
+        <div class="action-item" style="opacity:.55"><button class="ac" onclick="chk(this)"></button><div class="ac-body"><div class="ac-text">SM/WV transfer refusal policy &#8212; escalate to CMO</div><div class="ac-foot"><span class="ot">CMO</span><span class="dt">6/24</span></div></div></div>
+      </div>
+      <div class="scroll-pad"></div>
+    </div>
+
+    <div id="closeloop" class="page">
+      <div class="ah"><h2>Close Loop</h2></div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">&#128202; Today&#39;s Escalation Table</div><div class="card-sub">ValU output</div></div></div>
+        <div style="padding:0 16px 16px">
+          <div class="valu-wrap">
+            <table class="valu-table"><thead><tr><th>Type</th><th>Bed</th><th>Issue</th><th>Next Steps</th></tr></thead>
+            <tbody><tr><td><span class="esc-tag imm">Immediate</span></td><td>12</td><td>MICU eval &middot; Airborne</td><td>Hospitalist review chart</td></tr>
+            <tr><td><span class="esc-tag rec">Recurring</span></td><td>H11A</td><td>20+ admissions, SM/WV refusals</td><td>Expedite recuperative referral</td></tr></tbody></table>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head"><div><div class="card-title">&#128680; All Barriers This Huddle</div></div></div>
+        <div style="padding:0 16px 14px"><div id="all-barriers" style="font-size:13px;color:var(--muted)">No barriers logged yet.</div></div>
+      </div>
+      <div class="scroll-pad"></div>
+    </div>
+
+  </div>
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-report" onclick="showTab('report',this)"><span class="ni">&#128203;</span>Report</button>
+    <button class="nav-btn" id="nav-live" onclick="showTab('live',this)"><span class="ni">&#128225;</span>Live</button>
+    <button class="nav-btn" id="nav-actions" onclick="showTab('actions',this)"><span class="ni">&#9989;</span>Actions</button>
+    <button class="nav-btn" id="nav-closeloop" onclick="showTab('closeloop',this)"><span class="ni">&#128260;</span>Close</button>
+  </div>
+</div>
+
+<div id="bigscreen" class="screen">
+  <div class="bs-hdr">
+    <div><div class="bs-logo">ValU &middot; UCLA Health</div><div class="bs-title">ED Throughput Huddle</div></div>
+    <div style="text-align:center"><div class="bs-meta">Friday, June 26 &middot; 2:00 PM</div><div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px"><div style="width:8px;height:8px;border-radius:50%;background:#4ADE80;animation:blink 1.5s infinite"></div><span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.7)" id="bs-sec-name">Pre-Huddle</span></div></div>
+    <div style="display:flex;align-items:center;gap:12px">
+      <div class="bs-clock" id="bs-clock">0:00</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button onclick="showScreen('login')" style="padding:6px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.6);font-size:11px;font-weight:600;font-family:inherit;cursor:pointer">&larr; Back</button>
+        <button onclick="togglePause()" id="bs-pause" style="padding:6px 12px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.6);font-size:11px;font-weight:600;font-family:inherit;cursor:pointer">&#9646;&#9646; Pause</button>
+      </div>
+    </div>
+  </div>
+  <div class="bs-scroll">
+    <div class="bs-prog"><div class="bs-prog-fill" id="bs-prog-fill" style="width:0%"></div></div>
+    <div class="bs-stats">
+      <div class="bs-stat"><div class="bs-sv red" id="bs-t">38</div><div class="bs-sl">Total Census</div></div>
+      <div class="bs-stat"><div class="bs-sv amb" id="bs-b">12</div><div class="bs-sl">Boarding</div></div>
+      <div class="bs-stat"><div class="bs-sv grn" id="bs-o">2</div><div class="bs-sl">Open Beds</div></div>
+      <div class="bs-stat"><div class="bs-sv red" id="bs-a">6</div><div class="bs-sl">High Acuity</div></div>
+    </div>
+    <div class="bs-grid" id="bs-grid"></div>
+    <div id="bs-scribe" style="display:none;max-width:1400px;margin:16px auto 0">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;color:#C4B5FD;margin-bottom:8px">Scribe Notes</div>
+      <div style="background:rgba(124,58,237,.12);border:1.5px solid rgba(124,58,237,.3);border-radius:12px;padding:16px;font-size:14px;line-height:1.7;color:rgba(255,255,255,.85)" id="bs-scribe-txt"></div>
+    </div>
+  </div>
+  <div class="bs-ftr">
+    <span class="bs-ftr-note">&#9888; Big Screen shares state with the mobile session in the same browser window.</span>
+    <button class="bs-back" onclick="showScreen('app')">&larr; Back to App</button>
+  </div>
+</div>
+
+<!-- BED SHEET -->
+<div class="overlay" id="bed-overlay" onclick="closeBed(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 id="bed-sheet-title">Bed 9</h3>
+    <p>Tap a status, add a note if needed.</p>
+    <div class="so-grid">
+      <button class="so" onclick="pickStatus('occupied')"><div class="oi">&#128308;</div><span class="ol">Occupied</span><span class="os">Patient in bed</span></button>
+      <button class="so" onclick="pickStatus('open-bed')"><div class="oi">&#128994;</div><span class="ol">Open</span><span class="os">Ready for patient</span></button>
+      <button class="so" onclick="pickStatus('boarding')"><div class="oi">&#128993;</div><span class="ol">Boarding</span><span class="os">Inpatient in ED bed</span></button>
+      <button class="so" onclick="pickStatus('cleaning')"><div class="oi">&#9898;</div><span class="ol">Cleaning</span><span class="os">EVS in progress</span></button>
+    </div>
+    <textarea class="notes-f" id="bed-note" placeholder="Note &#8212; patient name, plan, ETA&#8230;"></textarea>
+    <button class="sheet-save" onclick="saveBed()">Update Bed</button>
+  </div>
+</div>
+
+<!-- BARRIER SHEET -->
+<div class="overlay" id="barrier-overlay" onclick="closeBarrier(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>Log a Barrier</h3>
+    <p>Describe the barrier &#8212; added to the running list.</p>
+    <div class="sheet-fields">
+      <div><label class="fl">Barrier description</label><input class="fi" type="text" id="barrier-txt" placeholder="What&#39;s blocking flow?"/></div>
+      <div><label class="fl">Category</label>
+        <div class="sw"><select class="fs" id="barrier-cat">
+          <option>Boarding</option><option>Transfer</option><option>Imaging / IR</option><option>Staffing</option><option>Bed Availability</option><option>Equipment</option><option>Other</option>
+        </select></div>
+      </div>
+    </div>
+    <button class="sheet-save" onclick="saveBarrier()" style="margin-top:16px">Add Barrier</button>
+  </div>
+</div>
+
+<!-- ACTION SHEET -->
+<div class="overlay" id="action-overlay" onclick="closeAction(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3>Add Action Item</h3>
+    <p>Capture a task from this huddle.</p>
+    <div class="sheet-fields">
+      <div><label class="fl">Action</label><input class="fi" type="text" id="act-txt" placeholder="What needs to happen?"/></div>
+      <div><label class="fl">Owner</label><div class="sw"><select class="fs" id="act-owner"><option>Bed Placement</option><option>Hospitalist</option><option>Care Coord</option><option>Optimizer</option><option>CMO</option><option>Nursing Dir.</option><option>ED Charge</option><option>ECU Charge</option><option>ValU</option></select></div></div>
+      <div><label class="fl">Due</label><div class="sw"><select class="fs" id="act-due"><option>Due today</option><option>Urgent</option><option>By end of week</option><option>Carry forward</option></select></div></div>
+    </div>
+    <button class="sheet-save" onclick="saveAction()" style="margin-top:16px">Add Action</button>
+  </div>
+</div>
+
+<script>
+const S={
+  role:'opt',isScribe:false,phase:0,secIdx:-1,
+  secs:{chr:{saved:false,d:{}},ecu:{saved:false,d:{}},opt:{saved:true,d:{rounds:'Walk rounds complete. Bed 12 needs MICU eval.',desa:'Bed 9 \u2192 7W \u2713 \u00b7 Bed 10 \u2192 GOU/5SEMS \u2713',p1:'H11A \u2014 20+ admissions, expedition to recuperative referral',p2:'H12B \u2014 Refused SM/WV transfers, need alt plan',p3:'Bed 12 MICU eval \u2014 Airborne, review chart',b1:'Close loop on morning escalations',b2:'SM/WV transfer refusals ongoing',b3:'Bed 38 solid onc \u2014 transfer to SM pending'}},hsp:{saved:false,d:{}},crd:{saved:false,d:{}},bed:{saved:false,d:{}},nur:{saved:false,d:{}},icu:{saved:false,d:{}},img:{saved:false,d:{}}},
+  census:{t:38,b:12,o:2,a:6},scribeNotes:'',
+  barriers:{wt:[],huddle:[]},dispos:{9:null,10:null,11:null,12:null}
+};
+const SECS=['chr','ecu','opt','img','icu','hsp','crd','bed','nur'];
+const SNAMES={chr:'ED Census',ecu:'ECU Unit Director',opt:'ED Optimizer',img:'Imaging & IR',icu:'ICU Status',hsp:'Medicine Triage',crd:'Case Mgmt',bed:'Patient Placement',nur:'IP RN Leadership'};
+const DISPOS=['Home','Inpatient','SM','WV','ICU','OR','Other'];
+const bedData={9:{s:'occupied',n:'Urology \u00b7 Foley'},10:{s:'occupied',n:'Pre-liver tx'},11:{s:'boarding',n:'Trach \u00b7 cerebral palsy'},12:{s:'boarding',n:'MICU eval needed'},22:{s:'occupied',n:''},23:{s:'open-bed',n:''},24:{s:'occupied',n:''},25:{s:'cleaning',n:''},26:{s:'occupied',n:''},27:{s:'open-bed',n:''}};
+const slbl={occupied:'OCC','open-bed':'OPEN',boarding:'BRDG',cleaning:'CLN'};
+let activeBed=null,pendingStatus=null,dragSrc=null;
+let tStart=Date.now(),tOffset=0,tPaused=false,tInterval=null,lapTimes={};
+
+function el(id){return document.getElementById(id)}
+function val(id){return el(id)?.value||''}
+
+// TIMER
+function getElapsed(){return tPaused?tOffset:tOffset+(Date.now()-tStart)}
+function fmtTime(ms){const s=Math.floor(ms/1000),m=Math.floor(s/60);return m+':'+String(s%60).padStart(2,'0')}
+function startTimer(){tStart=Date.now();tOffset=0;tPaused=false;if(tInterval)clearInterval(tInterval);tInterval=setInterval(tick,500)}
+function togglePause(){if(tPaused){tStart=Date.now();tPaused=false;el('pause-btn').innerHTML='&#9646;&#9646;';el('bs-pause').innerHTML='&#9646;&#9646; Pause'}else{tOffset+=Date.now()-tStart;tPaused=true;el('pause-btn').innerHTML='&#9654;';el('bs-pause').innerHTML='&#9654; Resume'}}
+function tick(){
+  const e=getElapsed(),curKey=SECS[S.secIdx];
+  const lap=curKey&&lapTimes[curKey]!=null?e-lapTimes[curKey]:e;
+  const allot=curKey?parseInt(document.querySelector('#sec-'+curKey)?.getAttribute('data-allotted')||0)*60000:0;
+  const d=fmtTime(lap),cls=(allot&&lap>allot*1.5?' over':allot&&lap>allot?' warn':'');
+  const lc=el('lap-clock'),bc=el('bs-clock');
+  if(lc){lc.textContent=d;lc.className='lap-clock'+cls}
+  if(bc){bc.textContent=d;bc.className='bs-clock'+cls}
+  SECS.forEach(k=>{const le=el('lt-sec-'+k);if(le&&lapTimes[k]!=null){const end=lapTimes[k+'_e']!=null?lapTimes[k+'_e']:e;le.textContent=fmtTime(end-lapTimes[k])}})
+}
+function nextSection(){
+  const curKey=SECS[S.secIdx];if(curKey)lapTimes[curKey+'_e']=getElapsed();
+  S.secIdx=Math.min(S.secIdx+1,SECS.length-1);
+  const nk=SECS[S.secIdx];lapTimes[nk]=getElapsed();
+  const nm=SNAMES[nk]||'';
+  const tn=el('timer-name'),bn=el('bs-sec-name');if(tn)tn.textContent=nm;if(bn)bn.textContent=nm;
+  document.querySelectorAll('.section-card').forEach(c=>c.classList.remove('active-section'));
+  document.querySelectorAll('.read-card').forEach(c=>c.classList.remove('cur'));
+  el('sec-'+nk)?.classList.add('active-section');el('lc-'+nk)?.classList.add('cur');
+  renderBS()
+}
+
+// ROLES
+const roleMap={opt:{l:'Optimizer',c:'rp-opt'},chr:{l:'ED Charge',c:'rp-chr'},ecu:{l:'ECU Charge',c:'rp-ecu'},cmo:{l:'CMO',c:'rp-cmo'},hsp:{l:'Hospitalist',c:'rp-hsp'},nur:{l:'Nursing Dir',c:'rp-nur'},crd:{l:'Care Coord',c:'rp-crd'},bed:{l:'Bed Place.',c:'rp-bed'},scr:{l:'Scribe',c:'rp-scr'},vlu:{l:'ValU',c:'rp-vlu'}};
+const roleShow={opt:['sec-opt'],chr:['sec-chr'],ecu:['sec-ecu'],cmo:['sec-opt'],hsp:['sec-hsp'],nur:['sec-opt','sec-nur'],crd:['sec-crd'],bed:['sec-bed'],scr:['sec-chr','sec-ecu','sec-opt','sec-hsp','sec-crd','sec-bed','sec-nur'],vlu:['sec-opt']};
+
+function signIn(){
+  const k=el('role-sel').value;S.role=k;S.isScribe=k==='scr';
+  showScreen('app');
+  const r=roleMap[k]||roleMap.opt;const p=el('role-pill');p.textContent=r.l;p.className='role-pill '+r.c;
+  document.querySelectorAll('.role-section').forEach(e=>e.style.display='none');
+  (roleShow[k]||[]).forEach(id=>{const e=el(id);if(e)e.style.display='block'});
+  el('scribe-panel').style.display=S.isScribe?'block':'none';
+  el('scribe-bar').classList.toggle('show',S.isScribe);
+  el('next-btn').classList.toggle('show',S.isScribe);
+  el('pause-btn').classList.toggle('show',S.isScribe);
+  renderBeds('beds-9-12',[9,10,11,12]);renderBeds('beds-22-27',[22,23,24,25,26,27]);
+  renderDispoGrid();startTimer()
+}
+function openBigScreen(){showScreen('bigscreen');startTimer();renderBS();setInterval(renderBS,2000)}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));el(id).classList.add('active')}
+
+// PHASE
+function goPhase(n){
+  S.phase=n;
+  document.querySelectorAll('.phs').forEach(p=>p.classList.remove('active'));
+  el('phs-'+n)?.classList.add('active');
+  document.querySelectorAll('.ps-btn').forEach((b,i)=>{b.classList.remove('active','done');if(i===n)b.classList.add('active');else if(i<n)b.classList.add('done')});
+  const names=['Pre-Huddle','Walk-Through','Huddle','Close Loop'];
+  const tn=el('timer-name');if(tn&&S.secIdx===-1)tn.textContent=names[n]
+}
+
+// BEDS
+function renderBeds(id,nums){
+  const e=el(id);if(!e)return;e.innerHTML='';
+  nums.forEach(n=>{const s=bedData[n]||{s:'open-bed',n:''};const b=document.createElement('button');b.className='bed-btn '+s.s;b.innerHTML='<span class="bn">'+n+'</span><span class="bs">'+slbl[s.s]+'</span>';b.onclick=()=>openBed(n);e.appendChild(b)})
+}
+const sCls={occupied:'s-occ','open-bed':'s-opn',boarding:'s-brd',cleaning:'s-cln'};
+const sOrd=['occupied','open-bed','boarding','cleaning'];
+function openBed(n){activeBed=n;pendingStatus=bedData[n].s;el('bed-sheet-title').textContent='Bed '+n;el('bed-note').value=bedData[n].n||'';refreshSo();el('bed-overlay').classList.add('open')}
+function refreshSo(){document.querySelectorAll('.so').forEach((e,i)=>{e.className='so';if(sOrd[i]===pendingStatus)e.classList.add(sCls[pendingStatus])})}
+function pickStatus(s){pendingStatus=s;refreshSo()}
+function saveBed(){if(activeBed){bedData[activeBed].s=pendingStatus;bedData[activeBed].n=el('bed-note').value}closeBed();renderBeds('beds-9-12',[9,10,11,12]);renderBeds('beds-22-27',[22,23,24,25,26,27]);renderDispoGrid();renderBS()}
+function closeBed(e){if(!e||e.target===el('bed-overlay'))el('bed-overlay').classList.remove('open')}
+
+// DISPO
+function renderDispoGrid(){
+  const g=el('dispo-grid');if(!g)return;
+  g.innerHTML=[9,10,11,12].map(n=>{
+    const s=bedData[n]||{s:'occupied'};const cur=S.dispos[n];
+    const btns=DISPOS.map(d=>'<button class="dispo-btn'+(cur===d?' sel':'')+'" onclick="setDispo('+n+',''+d+'')">'+d+'</button>').join('');
+    return '<div class="dispo-bed"><div class="dispo-bed-label">Bed '+n+' <span class="dispo-status '+s.s+'">'+slbl[s.s]+'</span></div><div class="dispo-btns">'+btns+'</div><input class="dispo-tf" type="text" placeholder="Timeframe (e.g. by 3pm)&#8230;" id="dt-'+n+'"/></div>'
+  }).join('')
+}
+function setDispo(bed,dispo){
+  S.dispos[bed]=dispo;
+  document.querySelectorAll('#dispo-grid .dispo-bed').forEach((row,i)=>{if([9,10,11,12][i]===bed)row.querySelectorAll('.dispo-btn').forEach(b=>b.classList.toggle('sel',b.textContent===dispo))})
+}
+
+// BARRIERS
+let bCtx='wt';
+function openBarrier(ctx){bCtx=ctx;el('barrier-txt').value='';el('barrier-overlay').classList.add('open')}
+function closeBarrier(e){if(!e||e.target===el('barrier-overlay'))el('barrier-overlay').classList.remove('open')}
+function saveBarrier(){
+  const txt=el('barrier-txt').value.trim();if(!txt)return;
+  const cat=el('barrier-cat').value;const time=new Date().toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+  S.barriers[bCtx].push({txt,cat,time});renderBarriers(bCtx);updateAllBarriers();closeBarrier()
+}
+function renderBarriers(ctx){
+  const list=el('bl-'+ctx);const cnt=el('bc-'+ctx);if(!list)return;
+  list.innerHTML=S.barriers[ctx].map((b,i)=>'<div class="barrier-item"><span class="barrier-text">'+b.cat+': '+b.txt+'</span><span class="barrier-time">'+b.time+'</span><button class="barrier-del" onclick="delBarrier(''+ctx+'','+i+')">&#215;</button></div>').join('');
+  if(cnt)cnt.textContent=S.barriers[ctx].length+' logged'
+}
+function delBarrier(ctx,i){S.barriers[ctx].splice(i,1);renderBarriers(ctx);updateAllBarriers()}
+function updateAllBarriers(){
+  const ab=el('all-barriers');if(!ab)return;
+  const all=[...S.barriers.wt.map(b=>({...b,phase:'Walk-Through'})),...S.barriers.huddle.map(b=>({...b,phase:'Huddle'}))];
+  if(!all.length){ab.innerHTML='<span style="color:var(--muted)">No barriers logged yet.</span>';return}
+  ab.innerHTML=all.map(b=>'<div class="barrier-item" style="margin-bottom:6px"><span class="barrier-text">['+b.phase+'] '+b.cat+': '+b.txt+'</span><span class="barrier-time">'+b.time+'</span></div>').join('')
+}
+
+// IMAGING
+function toggleImg(t){const c=el('img-'+t).checked;el('id-'+t)?.classList.toggle('show',c);const has=['ct','mri','ir'].some(x=>el('img-'+x)?.checked);const d=el('dot-img');if(d)d.className='s-dot '+(has?'draft':'empty')}
+function markImgSaved(){S.secs.img.saved=true;const d=el('dot-img');if(d)d.className='s-dot done';updateLiveCard('img');updateProg();renderBS()}
+
+// CENSUS
+function syncCensus(){const t=val('f-total'),b=val('f-board'),o=val('f-open'),a=val('f-acuity');setCensusDisplays(t,b,o,a)}
+function syncCensus2(){const t=val('f2-total'),b=val('f2-board'),o=val('f2-open'),a=val('f2-acuity');setCensusDisplays(t,b,o,a)}
+function setCensusDisplays(t,b,o,a){
+  ['stat-t','live-t','bs-t'].forEach(id=>{const e=el(id);if(e)e.textContent=t||'&#8212;'});
+  ['stat-b','live-b','bs-b'].forEach(id=>{const e=el(id);if(e)e.textContent=b||'&#8212;'});
+  ['stat-o','live-o','bs-o'].forEach(id=>{const e=el(id);if(e)e.textContent=o||'&#8212;'});
+  ['stat-a','live-a','bs-a'].forEach(id=>{const e=el(id);if(e)e.textContent=a||'&#8212;'})
+}
+function sync(key){
+  const d=S.secs[key]?.d;if(!d)return;
+  if(key==='opt'){d.rounds=val('f-opt-rounds');d.desa=val('f-opt-desa');d.p1=val('f-opt-p1');d.p2=val('f-opt-p2');d.p3=val('f-opt-p3');d.b1=val('f-opt-b1');d.b2=val('f-opt-b2');d.b3=val('f-opt-b3')}
+  else if(key==='hsp'){d.in=val('f-hsp-in');d.out=val('f-hsp-out');d.smwv=val('f-hsp-smwv');d.pend=val('f-hsp-pend');d.p1=val('f-hsp-p1');d.p2=val('f-hsp-p2');d.p3=val('f-hsp-p3')}
+  else if(key==='crd'){d.fb=val('f-crd-fb')}
+  else if(key==='bed'){d.pri=val('f-bed-pri');d.lkly=val('f-bed-lkly');d.avail=val('f-bed-avail');d.open=val('f-bed-open');d.shared=val('f-bed-shared');d.icu=val('f-bed-icu')}
+  else if(key==='nur'){d.plan=val('f-nur-plan');d.acts=val('f-nur-acts')}
+  else if(key==='chr'){d.flags=val('f-chr-flags')}
+  else if(key==='ecu'){d.b=val('f-ecu-b');d.h=val('f-ecu-h');d.los=val('f-ecu-los');d.flags=val('f-ecu-flags')}
+  else if(key==='icu'){d.ud=val('f-icu-ud');d.micu=val('f-icu-micu')}
+  renderBS()
+}
+function syncScribeNotes(){
+  S.scribeNotes=val('scribe-notes');
+  const txt=S.scribeNotes;
+  const lb=el('live-scribe-block');const lt=el('live-scribe-txt');const bs=el('bs-scribe');const bt=el('bs-scribe-txt');
+  if(lb)lb.style.display=txt?'block':'none';if(lt)lt.textContent=txt;if(bs)bs.style.display=txt?'block':'none';if(bt)bt.textContent=txt
+}
+function scribeJump(id){if(!id)return;const e=el(id);if(!e)return;e.querySelector('.s-body')?.classList.add('open');e.querySelector('.chev')?.classList.add('open');e.scrollIntoView({behavior:'smooth',block:'start'})}
+
+// SAVE
+function markSaved(btn,key){
+  btn.classList.add('saved');btn.textContent='&#10003; Saved';
+  if(key&&S.secs[key]){S.secs[key].saved=true;sync(key);updateLiveCard(key)}
+  const d=btn.closest('.section-card')?.querySelector('.s-dot');if(d)d.className='s-dot done';
+  updateProg();renderBS();
+  setTimeout(()=>{btn.classList.remove('saved');btn.textContent='Save My Report'},2500)
+}
+function mkLive(rn,title,sub,body){return '<div class="rh"><div class="rn">'+rn+'</div><div class="rm"><div class="r-title">'+title+'</div><div class="r-sub">'+sub+'</div></div><div class="s-dot done"></div></div><div class="rb">'+body+'</div>'}
+function fld(l,v){return v?'<div><div class="rfl">'+l+'</div><div class="rfv">'+v+'</div></div>':''}
+function updateLiveCard(key){
+  const d=S.secs[key]?.d||{};const c=el('lc-'+key);if(!c)return;c.classList.remove('awaiting');
+  if(key==='opt')c.innerHTML=mkLive('2','ED Optimizer','10 min',fld('Walk Rounds',d.rounds)+fld('DESA',d.desa)+'<div><div class="rfl">Prioritizations</div><ul class="rlist">'+[d.p1,d.p2,d.p3].filter(Boolean).map(x=>'<li>'+x+'</li>').join('')+'</ul></div>');
+  else if(key==='hsp')c.innerHTML=mkLive('4','Medicine Triage','8 min',fld('Transfers','In: '+(d.in||'&#8212;')+' &#183; Out: '+(d.out||'&#8212;'))+fld('SM/WV Priorities',d.smwv));
+  else if(key==='crd')c.innerHTML=mkLive('5','Case Mgmt','3 min',fld('Transfer Priority',getXferText()));
+  else if(key==='bed')c.innerHTML=mkLive('6','Patient Placement','3 min',fld('Available',(d.avail||'&#8212;')+' &#183; Opening: '+(d.open||'&#8212;'))+fld('Priorities',d.pri));
+  else if(key==='nur')c.innerHTML=mkLive('7','IP RN Leadership','2 min',fld('Boarder Plan',d.plan));
+  else if(key==='ecu')c.innerHTML=mkLive('E','ECU Unit Director','5 min',fld('Boarders','ECU: '+(d.b||'&#8212;')+' &#183; Hall: '+(d.h||'&#8212;'))+fld('Longest LOS',d.los));
+  else if(key==='img'){const dls=['ct','mri','ir'].filter(t=>el('img-'+t)?.checked).map(t=>t.toUpperCase()).join(', ')||'No delays';c.innerHTML=mkLive('&#128247;','Imaging &amp; IR','Quick update',fld('Delays',dls))}
+  else if(key==='icu')c.innerHTML=mkLive('&#127973;','ICU Status','Upgrades &#183; Queue',fld('Notes',d.ud)+fld('MICU Queue',d.micu))
+}
+function getXferText(){return Array.from(document.querySelectorAll('#xfer-list .xfer-item')).map((e,i)=>(i+1)+'. '+(e.querySelector('.xfer-text')?.textContent||'')).join(' &#183; ')||'&#8212;'}
+function updateProg(){
+  const saved=Object.keys(S.secs).filter(k=>S.secs[k].saved).length,total=Object.keys(S.secs).length,pct=Math.round(saved/total*100);
+  const f=el('live-prog'),t=el('live-prog-txt'),b=el('bs-prog-fill');
+  if(f)f.style.width=pct+'%';if(t)t.textContent=saved+' of '+total+' sections complete';if(b)b.style.width=pct+'%'
+}
+
+// DRAG
+function initDrag(){
+  const list=el('xfer-list');if(!list)return;
+  list.addEventListener('dragstart',e=>{dragSrc=e.target.closest('.xfer-item');setTimeout(()=>dragSrc?.classList.add('dragging'),0)});
+  list.addEventListener('dragend',e=>{e.target.closest('.xfer-item')?.classList.remove('dragging');reRank()});
+  list.addEventListener('dragover',e=>{e.preventDefault();const t=e.target.closest('.xfer-item');if(t&&t!==dragSrc){const mid=t.getBoundingClientRect().top+t.getBoundingClientRect().height/2;if(e.clientY>mid)t.after(dragSrc);else t.before(dragSrc)}});
+  list.addEventListener('touchstart',e=>{dragSrc=e.target.closest('.xfer-item')},{passive:true});
+  list.addEventListener('touchmove',e=>{if(!dragSrc)return;e.preventDefault();const t=e.touches[0],tgt=document.elementFromPoint(t.clientX,t.clientY)?.closest('.xfer-item');if(tgt&&tgt!==dragSrc)tgt.before(dragSrc)},{passive:false});
+  list.addEventListener('touchend',()=>reRank())
+}
+function reRank(){document.querySelectorAll('#xfer-list .xfer-rank').forEach((e,i)=>e.textContent=i+1)}
+function addXfer(){const inp=el('xfer-input');const txt=inp?.value.trim();if(!txt)return;const list=el('xfer-list');const d=document.createElement('div');d.className='xfer-item';d.draggable=true;d.innerHTML='<span class="drag-handle">&#10783;</span><div class="xfer-rank">'+(list.children.length+1)+'</div><span class="xfer-text">'+txt+'</span><span class="xfer-dest">TBD</span>';list.appendChild(d);inp.value=''}
+
+// VALU TABLE
+function addRow(){const tb=el('valu-tbody');const tr=document.createElement('tr');tr.innerHTML='<td><select><option>Immediate</option><option>Recurring</option></select></td><td><input placeholder="Bed #"/></td><td><input placeholder="MRN"/></td><td><textarea placeholder="Issue&#8230;" rows="2"></textarea></td><td><textarea placeholder="Next steps&#8230;" rows="2"></textarea></td><td><textarea placeholder="Notes&#8230;" rows="2"></textarea></td><td><button onclick="delRow(this)" style="background:none;border:none;color:var(--light);font-size:18px;cursor:pointer">&#215;</button></td>';tb.appendChild(tr)}
+function delRow(btn){btn.closest('tr').remove()}
+
+// TABS
+function showTab(id,el_){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));el(id).classList.add('active');document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',['report','live','actions','closeloop'][i]===id));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));el_.classList.add('active')}
+function toggleSec(head){const body=head.nextElementSibling;const chev=head.querySelector('.chev');const open=body.classList.toggle('open');chev.classList.toggle('open',open)}
+
+// ACTIONS
+function openAction(){el('action-overlay').classList.add('open')}
+function closeAction(e){if(!e||e.target===el('action-overlay'))el('action-overlay').classList.remove('open')}
+function saveAction(){const txt=el('act-txt').value.trim();const own=el('act-owner').value;const due=el('act-due').value;if(!txt)return;const d=document.createElement('div');d.className='action-item';d.innerHTML='<button class="ac" onclick="chk(this)"></button><div class="ac-body"><div class="ac-text">'+txt+'</div><div class="ac-foot"><span class="ot">'+own+'</span><span class="dt">'+due+'</span></div></div>';el('action-list').prepend(d);el('act-txt').value='';closeAction()}
+function chk(btn){btn.classList.toggle('checked');btn.nextElementSibling?.querySelector('.ac-text')?.classList.toggle('done',btn.classList.contains('checked'))}
+
+// COMPLETE
+function completeHuddle(){alert('Huddle complete \u2713\n\nIn V5, this will save the full session to Supabase.')}
+
+// BIG SCREEN
+function renderBS(){
+  const grid=el('bs-grid');if(!grid)return;
+  const defs=[{key:'chr',n:'C',t:'ED Census',s:'ED Charge'},{key:'ecu',n:'E',t:'ECU Unit Director',s:'5 min'},{key:'opt',n:'2',t:'ED Optimizer',s:'10 min'},{key:'img',n:'&#128247;',t:'Imaging &amp; IR',s:'Quick update'},{key:'icu',n:'&#127973;',t:'ICU Status',s:'Upgrades &#183; Queue'},{key:'hsp',n:'4',t:'Medicine Triage',s:'8 min'},{key:'crd',n:'5',t:'Case Mgmt',s:'3 min'},{key:'bed',n:'6',t:'Patient Placement',s:'3 min'},{key:'nur',n:'7',t:'IP RN Leadership',s:'2 min'}];
+  const ci=S.secIdx;
+  grid.innerHTML=defs.map((sec,idx)=>{
+    const s=S.secs[sec.key]||{saved:false,d:{}};const d=s.d||{};const isNow=idx===ci;
+    let body='';
+    if(sec.key==='opt'&&(s.saved||d.p1))body='<div class="bs-fl">Prioritizations</div><div class="bs-fv">'+(d.p1?'1. '+d.p1:'')+(d.p2?'<br>2. '+d.p2:'')+(d.p3?'<br>3. '+d.p3:'')+'</div>';
+    else if(sec.key==='hsp'&&s.saved)body='<div class="bs-fl">Transfers</div><div class="bs-fv">'+(d.in||'&#8212;')+' in &#183; '+(d.out||'&#8212;')+' out</div>'+(d.smwv?'<div class="bs-fl" style="margin-top:6px">SM/WV</div><div class="bs-fv">'+d.smwv+'</div>':'');
+    else if(sec.key==='bed'&&s.saved)body='<div class="bs-fl">Available</div><div class="bs-fv">'+(d.avail||'&#8212;')+' &#183; '+(d.open||'&#8212;')+'</div>';
+    else if(sec.key==='ecu'&&s.saved)body='<div class="bs-fl">Boarders</div><div class="bs-fv">ECU: '+(d.b||'&#8212;')+' &#183; Hall: '+(d.h||'&#8212;')+'</div>';
+    else if(sec.key==='nur'&&s.saved)body='<div class="bs-fl">Boarder Plan</div><div class="bs-fv">'+(d.plan||'&#8212;')+'</div>';
+    else if(sec.key==='crd'&&s.saved)body='<div class="bs-fl">Transfer Priority</div><div class="bs-fv">'+getXferText()+'</div>';
+    else if(sec.key==='icu'&&s.saved)body='<div class="bs-fl">Notes</div><div class="bs-fv">'+(d.ud||'&#8212;')+'</div>';
+    else if(sec.key==='img'&&s.saved){const dls=['ct','mri','ir'].filter(t=>el('img-'+t)?.checked).map(t=>t.toUpperCase()).join(', ')||'No delays';body='<div class="bs-fl">Delays</div><div class="bs-fv">'+dls+'</div>'}
+    return '<div class="bs-card'+(isNow?' now':'')+'"><div class="bs-card-hd"><div class="bs-n'+(isNow?' active':'')+'">'+sec.n+'</div><div><div class="bs-ct">'+sec.t+'</div><div class="bs-cs">'+sec.s+'</div></div><div class="bs-status">'+(isNow?'<span style="font-size:10px;font-weight:700;color:#90CDF4;background:rgba(39,116,174,.25);padding:3px 7px;border-radius:6px">NOW</span>':'')+'<div class="bs-dot '+(s.saved?'done':'empty')+'"></div></div></div>'+(body?'<div class="bs-body">'+body+'</div>':'<div class="bs-await">Awaiting submission&#8230;</div>')+'</div>'
+  }).join('')
+}
+
+window.addEventListener('DOMContentLoaded',()=>{
+  renderBeds('beds-9-12',[9,10,11,12]);renderBeds('beds-22-27',[22,23,24,25,26,27]);renderDispoGrid();renderBS();initDrag()
+})
+</script>
+</body>
+</html>
